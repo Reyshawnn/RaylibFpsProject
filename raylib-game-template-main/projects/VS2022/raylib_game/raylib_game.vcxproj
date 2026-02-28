@@ -361,10 +361,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\screens.h" />
-    <ClInclude Include="..\raylib\Map.h" />
     <ClInclude Include="Actor.h" />
     <ClInclude Include="Bullet.h" />
+    <ClInclude Include="Collision.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Input.h" />
+    <ClInclude Include="Map.h" />
+    <ClInclude Include="Movement.h" />
     <ClInclude Include="Physics.h" />
   </ItemGroup>
   <ItemGroup>
@@ -372,7 +375,10 @@
     <ClCompile Include="..\raylib\Map.cpp" />
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="Collision.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Input.cpp" />
+    <ClCompile Include="Movement.cpp" />
     <ClCompile Include="Physics.cpp" />
   </ItemGroup>
   <ItemGroup>

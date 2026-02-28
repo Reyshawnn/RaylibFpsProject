@@ -299,7 +299,7 @@ int main(void)
         char sideway = (IsKeyDown(KEY_D) - IsKeyDown(KEY_A));
         char forward = (IsKeyDown(KEY_W) - IsKeyDown(KEY_S));
         bool crouching = IsKeyDown(KEY_LEFT_CONTROL);
-        Vector3 lastPos = player.position;
+        
 
 
          
@@ -310,7 +310,9 @@ int main(void)
 
 
         float delta = GetFrameTime();
+
         headLerp = Lerp(headLerp, (crouching ? CROUCH_HEIGHT : STAND_HEIGHT), 20.0f * delta);
+
         camera.position = Vector3{
             player.position.x,
             player.position.y + (BOTTOM_HEIGHT + headLerp),
@@ -393,32 +395,10 @@ int main(void)
         }
 
 
-        /*player.box.min = {
-      player.position.x - 0.5f,
-      player.position.y,
-      player.position.z - 0.5f
-        };
-
-        player.box.max = {
-         player.position.x + 0.5f,
-         player.position.y + 0.5f,
-         player.position.z + 0.5f
-        };*/
-
-        /*  for (auto bullet : player.ammoList)
-          {
-              if (bullet.state = 0)
-              {
-                  bullet.position = weapon.position;
-                  bullet.dir = weapon.dir;
-              }
-          }*/
-
-
-
         lean.x = Lerp(lean.x, sideway * 0.02f, 10.0f * delta);
         lean.y = Lerp(lean.y, forward * 0.015f, 10.0f * delta);
-        // player.bullet.position = player.position;
+    
+
         UpdateCameraFPS(&camera, &weapon);
         AttachWeaponToCamera(&weapon, camera);
 
@@ -510,7 +490,7 @@ int main(void)
 static void UpdateBody(Body* body, float yaw, char side, char forward, bool jumpPressed, bool crouchHold)
 {
     // --------------------------------------------------
-    // 1. INPUT (PLAYER LOCAL SPACE)
+    // 1. INPUT (PLAYER LOCAL SPACE) INPUT
     // --------------------------------------------------
 
     Vector2 input = { (float)side, (float)-forward };
@@ -524,7 +504,7 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
 
 
     // --------------------------------------------------
-    // 2. VERTICAL PHYSICS (WORLD SPACE)
+    // 2. VERTICAL PHYSICS (WORLD SPACE)PHYS
     // --------------------------------------------------
 
     if (!body->isGrounded)
@@ -538,7 +518,7 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
 
 
     // --------------------------------------------------
-    // 3. BUILD PLAYER BASIS (ROTATED COORDINATE SYSTEM)
+    // 3. BUILD PLAYER BASIS (ROTATED COORDINATE SYSTEM) - Input
     // --------------------------------------------------
 
     Vector3 forwardDir = {
@@ -555,7 +535,7 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
 
 
     // --------------------------------------------------
-    // 4. TRANSFORM INPUT → WORLD SPACE DIRECTION
+    // 4. TRANSFORM INPUT → WORLD SPACE DIRECTION INPUT - Input
     // --------------------------------------------------
 
     Vector3 desiredDir = {
@@ -568,7 +548,7 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
 
 
     // --------------------------------------------------
-    // 5. APPLY FRICTION / AIR DRAG (WORLD SPACE)
+    // 5. APPLY FRICTION / AIR DRAG (WORLD SPACE) PHYS
     // --------------------------------------------------
 
     float drag = body->isGrounded ? FRICTION : AIR_DRAG;
@@ -579,12 +559,12 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
         body->velocity.z * drag
     };
 
-    if (Vector3Length(horizontalVelocity) < MAX_SPEED * 0.01f)
+    if (Vector3Length(horizontalVelocity) < MAX_SPEED * 0.01f) // interesting velo threshold
         horizontalVelocity = { 0 };
 
 
     // --------------------------------------------------
-    // 6. ACCELERATION ALONG DESIRED DIRECTION
+    // 6. ACCELERATION ALONG DESIRED DIRECTION PHYS
     // --------------------------------------------------
 
     float currentSpeed = Vector3DotProduct(horizontalVelocity, body->dir);
@@ -605,12 +585,14 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
 
 
     // --------------------------------------------------
-    // 7. INTEGRATE POSITION (WORLD SPACE)
+    // 7. INTEGRATE POSITION (WORLD SPACE) PHYS / COLLISION
     // --------------------------------------------------
 
+    //PHYS
     float nextX{ body->position.x + body->velocity.x * dt };
     float nextZ{ body->position.z + body->velocity.z * dt };
 
+    //COLLISION
     BoundingBox xBox{};
     BoundingBox zBox{};
 
@@ -681,7 +663,7 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
         }
     }
 
-
+    //Movement
     if (hitTowerX && hitTowerZ)
     {
         body->position.y += body->velocity.y * dt;
@@ -703,7 +685,7 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
         body->position.z = nextZ;
     }
 
-
+    //Collision - Bullet vs Target
     for (auto& bullet : player.ammoList)
     {
         if (CheckCollisionBoxes(bullet.box, t1.box))
@@ -717,7 +699,7 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
 
 
     // --------------------------------------------------
-    // 8. SIMPLE GROUND COLLISION
+    // 8. SIMPLE GROUND COLLISION COLLISION
     // --------------------------------------------------
 
     if (body->position.y <= 0.0f)
