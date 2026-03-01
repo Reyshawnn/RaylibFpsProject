@@ -1,22 +1,34 @@
 #include "Physics.h"
-void Physics::calcVelocity(Actor* actor,float dt)
+void Physics::horiVelo(Actor* actor, float dt)
 {
-    float drag = actor->isGrounded ? FRICTION : AIR_DRAG;
+    float resistance = actor->isGrounded ? FRICTION : AIR_DRAG;
 
-    Vector3 horizontalVelocity = {
-        actor->velocity.x * drag,
+    horizontalVelocity = Vector3{
+        actor->velocity.x * resistance,
         0.0f,
-        actor->velocity.z * drag
+        actor->velocity.z * resistance
     };
 
-    if (Vector3Length(horizontalVelocity) < MAX_SPEED * 0.01f) // interesting velo threshold
+    if (Vector3Length(horizontalVelocity) < MAX_SPEED * 0.01f)
         horizontalVelocity = { 0 };
+}
 
 
-    // --------------------------------------------------
-    // 6. ACCELERATION ALONG DESIRED DIRECTION PHYS
-    // --------------------------------------------------
+void Physics::jumpCheck(Actor* actor, float dt)
+{
+    if (!actor->isGrounded)
+        actor->velocity.y -= GRAVITY * dt;
 
+    if (actor->isGrounded && actor->jumpPressed)
+    {
+        actor->velocity.y = JUMP_FORCE;
+        actor->isGrounded = false;
+    }
+}
+
+void Physics::calcVelocity(Actor* actor, float dt)
+{
+    
     float currentSpeed = Vector3DotProduct(horizontalVelocity, actor->dir);
 
     float maxSpeed = actor->isCrouched ? CROUCH_SPEED : MAX_SPEED;
@@ -32,17 +44,4 @@ void Physics::calcVelocity(Actor* actor,float dt)
 
     actor->velocity.x = horizontalVelocity.x;
     actor->velocity.z = horizontalVelocity.z;
-}
-
-
-void Physics::jumpCheck(Actor* actor, float dt)
-{
-    if (!actor->isGrounded)
-        actor->velocity.y -= GRAVITY * dt;
-
-    if (actor->isGrounded && actor->jumpPressed)
-    {
-        actor->velocity.y = JUMP_FORCE;
-        actor->isGrounded = false;
-    }
 }

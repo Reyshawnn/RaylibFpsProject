@@ -1,7 +1,16 @@
 #include "Input.h"
 
-void Input::setInputs(const char side, const char forward)
+void Input::setInputs(const char side, const char forward, bool jumpPressed)
 {
+	if (jumpPressed)
+	{
+		jump = true;
+	}
+	else
+	{
+		jump = false;
+	}
+
 
 	inputs.x = (float)side;
 	inputs.y = (float)-forward;
@@ -14,6 +23,7 @@ void Input::setInputs(const char side, const char forward)
 	}
 #endif
 
+	
 	
 
 
@@ -50,12 +60,18 @@ constexpr Vector3 Input::getForwardDirection() const
 	};
 
 	finalDir = Vector3Lerp(nextDir, finalDir, CONTROL * dt);
+
 	
 }
 
 /*constexpr*/ Vector3 Input::getFinalDirection() const
 {
 	return finalDir;
+}
+
+bool Input::getJump() const
+{
+	return jump;
 }
 
 // Put this in final update function body->dir = Vector3Lerp(body->dir, desiredDir, CONTROL * dt);

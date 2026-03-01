@@ -9,7 +9,8 @@ class Input
 {
 public:
 	Vector2 getInputs() const;
-	void setInputs(const char side, const char forward);
+	bool getJump() const;
+	void setInputs(const char side, const char forward, bool jumpPressed);
 	void setDirection(const float lookX);
 	constexpr Vector3 getRightDirection() const;
 	constexpr Vector3 getForwardDirection() const;
@@ -23,5 +24,6 @@ private:
 	Vector3 forwardDir;
 	Vector3 finalDir;
 	Vector3 nextDir;
+	bool jump;
 };
  

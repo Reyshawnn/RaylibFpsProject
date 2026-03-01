@@ -14,20 +14,20 @@ void Collision::groundCheck(Actor* actor)
 
 void Collision::collInit(Actor* actor,float dt)
 {
-    float nextX{ actor->position.x + actor->velocity.x * dt };
-    float nextZ{ actor->position.z + actor->velocity.z * dt };
+    nextX =  actor->position.x + actor->velocity.x * dt;
+    nextZ =  actor->position.z + actor->velocity.z * dt;
 
 
     actor->boxX.min =
     {
-        actor->nextX - 0.5f,
+        nextX - 0.5f,
         actor->position.y,
         actor->position.z
     };
 
     actor->boxX.max =
     {
-        actor->nextX + 0.5f,
+        nextX + 0.5f,
         actor->position.y,
         actor->position.z
     };
@@ -36,15 +36,18 @@ void Collision::collInit(Actor* actor,float dt)
     {
         actor->position.x,
         actor->position.y,
-        actor->nextZ - 0.5f
+        nextZ - 0.5f
     };
 
     actor->boxZ.max =
     {
         actor->position.x,
         actor->position.y,
-        actor->nextZ + 0.5f
+        nextZ + 0.5f
     };
+
+    actor->collideX = false;
+    actor->collideZ = false;
 }
 
 void Collision::collBuilding(Actor* actor, std::vector<Structure>& buildings)
@@ -80,18 +83,28 @@ void Collision::collUpdate(std::vector<Actor>& actors,float dt)
         else if (actor.collideX && !actor.collideZ)
         {
             actor.position.y += actor.velocity.y * dt;
-            actor.position.z = actor.nextZ;
+            actor.position.z = nextZ;
         }
         else if (actor.collideZ && !actor.collideX)
         {
-            actor.position.x = actor.nextX;
+            actor.position.x = nextX;
             actor.position.y += actor.velocity.y * dt;
         }
         else if (!actor.collideX && !actor.collideZ)
         {
-            actor.position.x = actor.nextX;
+            actor.position.x = nextX;
             actor.position.y += actor.velocity.y * dt;
-            actor.position.z = actor.nextZ;
+            actor.position.z = nextZ;
         }
     }
+}
+
+
+float Collision::getNextX() const
+{
+    return nextX;
+}
+float Collision::getNextZ() const
+{
+    return nextZ;
 }

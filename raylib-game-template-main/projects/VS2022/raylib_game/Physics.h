@@ -15,13 +15,18 @@
 #define AIR_DRAG         0.98f
 // Responsiveness for turning movement direction to looked direction
 #define CROUCH_SPEED     5.0f
+
+struct Actor;
+
 class Physics
 {
 public:
 	void calcVelocity(Actor* actor,float dt);
 	void jumpCheck(Actor* actor,float dt);
+	void horiVelo(Actor* actor, float dt); //constexpr soon?
 	
 	
-
+private:
+	Vector3 horizontalVelocity;
 };
 

@@ -1,9 +1,15 @@
 #pragma once
 #include "raylib.h"
 #include "Bullet.h"
+#include "Input.h"
 #include <array>
+
+
+
+
 struct Actor
 {
+    //Actor primitive fields
     Vector3 position;
     Vector3 velocity;
     Vector3 dir;
@@ -14,14 +20,17 @@ struct Actor
     bool isCrouched;
     bool jumpPressed;
 
-    std::array<Bullet, 4> ammoList{};
+    std::array<Bullet, 4> ammoList;
 
+    //Collision Fields
     bool collideX;
     bool collideZ;
-    float nextX;
-    float nextZ;
     BoundingBox boxX;
     BoundingBox boxZ;
+
+    
+    Input input;
+    
 };
 
 class Action //Abstract class for Actions

@@ -13,6 +13,12 @@
 #include <format>
 
 #include "Input.h"
+
+#include "Physics.h"
+
+#include "Actor.h"
+
+#include "Collision.h"
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
@@ -48,24 +54,24 @@ struct Weapon
 
 };
 
-enum class BulletState
-{
-    idle,
-    fired,
-    travel,
-    hit,
-};
-
-struct Bullet
-{
-    Vector3 position{};
-    Vector3 velocity{ 55.0f,55.0f,55.0f };
-    Vector3 dir{};
-    BulletState state{ BulletState::idle };
-    Vector3 size{};
-    BoundingBox box;
-    int bulletID{};
-};
+//enum class BulletState
+//{
+//    idle,
+//    fired,
+//    travel,
+//    hit,
+//};
+//
+//struct Bullet
+//{
+//    Vector3 position{};
+//    Vector3 velocity{ 55.0f,55.0f,55.0f };
+//    Vector3 dir{};
+//    BulletState state{ BulletState::idle };
+//    Vector3 size{};
+//    BoundingBox box;
+//    int bulletID{};
+//};
 
 struct Tower
 {
@@ -76,17 +82,20 @@ struct Tower
     BoundingBox box;
 
 };
-struct Body {
-    Vector3 position{};
-    Vector3 velocity{};
-    Vector3 dir{};
-    bool isGrounded{};
-    bool hasShot{};
-    BoundingBox box{};
-    Input input{};
-    std::array<Bullet, 4> ammoList{};
+//struct Body {
+//    Vector3 position{};
+//    Vector3 velocity{};
+//    Vector3 dir{};
+//    bool isGrounded{};
+//    bool hasShot{};
+//    BoundingBox box{};
+//    Input input{};
+//    Physics phys{};
+//    std::array<Bullet, 4> ammoList{};
+//
+//};
 
-};
+
 
 struct Target
 {
@@ -115,7 +124,7 @@ static const Vector3 WEAPON_OFFSET = {
 //----------------------------------------------------------------------------------
 static Vector2 sensitivity = { 0.001f, 0.001f };
 
-static Body player = { 0 };
+static Actor player = { 0 };
 static Vector2 lookRotation = { 0 };
 static float headTimer = 0.0f;
 static float walkLerp = 0.0f;
@@ -124,6 +133,8 @@ static Vector2 lean = { 0 };
 static Weapon weapon{};
 static Bullet currBullet{};
 static bool bulletSpawn{ false };
+static Physics PhysicsEngine{};
+static Collision CollisionEngine{};
 
 //Map
 static const Vector3 towerSize = Vector3{ 16.0f, 32.0f, 16.0f };
@@ -181,7 +192,7 @@ static std::vector<Tower> walls{ wallOne,wallTwo,wallThree,wallFour };
 //----------------------------------------------------------------------------------
 static void DrawLevel(void); //Map
 static void UpdateCameraFPS(Camera* camera, Weapon* weapon); //Sys?
-static void UpdateBody(Body* body, float yaw, char side, char forward, bool jumpPressed, bool crouchHold); //Game
+static void UpdateBody(Actor* actor, float yaw, char side, char forward, bool jumpPressed, bool crouchHold); //Game
 void AttachWeaponToCamera(Weapon* weapon, const Camera& camera); //Game
 void DrawCameraDebug(const Camera& camera, const Weapon& weapon); //Debug
 void updateBullet(Bullet& bullet); //Game
@@ -492,20 +503,16 @@ int main(void)
 // Module Functions Definition
 //----------------------------------------------------------------------------------
 // Update body considering current world state
-static void UpdateBody(Body* body, float yaw, char side, char forward, bool jumpPressed, bool crouchHold)
+static void UpdateBody(Actor* Actor, float yaw, char side, char forward, bool jumpPressed, bool crouchHold)
 {
     // --------------------------------------------------
     // 1. INPUT (PLAYER LOCAL SPACE) INPUT
     // --------------------------------------------------
 
-    //Vector2 input = { (float)side, (float)-forward };
 
-    body->input.setInputs(side, forward);
+    Actor->input.setInputs(side, forward,jumpPressed);
 
-//#if defined(NORMALIZE_INPUT)
-//    if (side != 0 && forward != 0)
-//        input = Vector2Normalize(input);
-//#endif
+
 
     float dt = GetFrameTime();
 
@@ -513,72 +520,66 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
     // --------------------------------------------------
     // 2. VERTICAL PHYSICS (WORLD SPACE)PHYS
     // --------------------------------------------------
+    Actor->jumpPressed = Actor->input.getJump();
+    PhysicsEngine.jumpCheck(Actor, dt);
+    
+    
+    /*if (!Actor->isGrounded)
+        Actor->velocity.y -= GRAVITY * dt;
 
-    if (!body->isGrounded)
-        body->velocity.y -= GRAVITY * dt;
-
-    if (body->isGrounded && jumpPressed)
+    if (Actor->isGrounded && jumpPressed)
     {
-        body->velocity.y = JUMP_FORCE;
-        body->isGrounded = false;
-    }
+        Actor->velocity.y = JUMP_FORCE;
+        Actor->isGrounded = false;
+    }*/
+
+   
 
 
     // --------------------------------------------------
     // 3. BUILD PLAYER BASIS (ROTATED COORDINATE SYSTEM) - Input
     // --------------------------------------------------
 
-   /* Vector3 forwardDir = {
-        sinf(yaw),
-        0.0f,
-        cosf(yaw)
-    };
-
-    Vector3 rightDir = {
-        cosf(-yaw),
-        0.0f,
-        sinf(-yaw)
-    };*/
-
-    body->input.setDirection(yaw);
+  
+    Actor->input.setDirection(yaw);
 
 
     // --------------------------------------------------
     // 4. TRANSFORM INPUT → WORLD SPACE DIRECTION INPUT - Input
     // --------------------------------------------------
 
-  /*  Vector3 desiredDir = {
-        input.x * rightDir.x + input.y * forwardDir.x,
-        0.0f,
-        input.x * rightDir.z + input.y * forwardDir.z
-    };
 
-    body->dir = Vector3Lerp(body->dir, desiredDir, CONTROL * dt);*/
+    Actor->input.setFinalDirection(dt);
+    Actor->dir = Actor->input.getFinalDirection();
 
-    body->input.setFinalDirection(dt);
    
 
     // --------------------------------------------------
     // 5. APPLY FRICTION / AIR DRAG (WORLD SPACE) PHYS
     // --------------------------------------------------
 
-    float drag = body->isGrounded ? FRICTION : AIR_DRAG;
 
-    Vector3 horizontalVelocity = {
-        body->velocity.x * drag,
-        0.0f,
-        body->velocity.z * drag
-    };
+    PhysicsEngine.horiVelo(Actor, dt);
 
-    if (Vector3Length(horizontalVelocity) < MAX_SPEED * 0.01f) // interesting velo threshold
-        horizontalVelocity = { 0 };
+    //float drag = Actor->isGrounded ? FRICTION : AIR_DRAG;
+    //
+
+    //Vector3 horizontalVelocity = {
+    //    Actor->velocity.x * drag,
+    //    0.0f,
+    //    Actor->velocity.z * drag
+    //};
+
+    //if (Vector3Length(horizontalVelocity) < MAX_SPEED * 0.01f) // interesting velo threshold
+    //    horizontalVelocity = { 0 };
 
 
     // --------------------------------------------------
     // 6. ACCELERATION ALONG DESIRED DIRECTION PHYS
     // --------------------------------------------------
 
-    Vector3 finalDir{ body->input.getFinalDirection() };
+    PhysicsEngine.calcVelocity(Actor, dt);
+    /*Vector3 finalDir{ Actor->dir };
     float currentSpeed = Vector3DotProduct(horizontalVelocity, finalDir);
 
     float maxSpeed = crouchHold ? CROUCH_SPEED : MAX_SPEED;
@@ -589,72 +590,72 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
         MAX_ACCEL * dt
     );
 
-    //horizontalVelocity.x += body->dir.x * accel; //Change dir.x to rightdir and z to forward fd
-    //horizontalVelocity.z += body->dir.z * accel;
-
     horizontalVelocity.x += finalDir.x * accel;
     horizontalVelocity.z += finalDir.z * accel; 
 
-    body->velocity.x = horizontalVelocity.x;
-    body->velocity.z = horizontalVelocity.z;
+    Actor->velocity.x = horizontalVelocity.x;
+    Actor->velocity.z = horizontalVelocity.z;*/
 
 
     // --------------------------------------------------
     // 7. INTEGRATE POSITION (WORLD SPACE) PHYS / COLLISION
     // --------------------------------------------------
 
-    //PHYS
-    float nextX{ body->position.x + body->velocity.x * dt };
-    float nextZ{ body->position.z + body->velocity.z * dt };
+    ////PHYS
+    //float nextX{ Actor->position.x + Actor->velocity.x * dt };
+    //float nextZ{ Actor->position.z + Actor->velocity.z * dt };
 
-    //COLLISION
-    BoundingBox xBox{};
-    BoundingBox zBox{};
+    ////COLLISION
+    //BoundingBox xBox{};
+    //BoundingBox zBox{};
 
-    xBox.min =
-    {
-        nextX - 0.5f,
-        body->position.y,
-        body->position.z
-    };
+    //xBox.min =
+    //{
+    //    nextX - 0.5f,
+    //    Actor->position.y,
+    //    Actor->position.z
+    //};
 
-    xBox.max =
-    {
-        nextX + 0.5f,
-        body->position.y,
-        body->position.z
-    };
+    //xBox.max =
+    //{
+    //    nextX + 0.5f,
+    //    Actor->position.y,
+    //    Actor->position.z
+    //};
 
-    zBox.min =
-    {
-        body->position.x,
-        body->position.y,
-        nextZ - 0.5f
-    };
+    //zBox.min =
+    //{
+    //    Actor->position.x,
+    //    Actor->position.y,
+    //    nextZ - 0.5f
+    //};
 
-    zBox.max =
-    {
-        body->position.x,
-        body->position.y,
-        nextZ + 0.5f
-    };
+    //zBox.max =
+    //{
+    //    Actor->position.x,
+    //    Actor->position.y,
+    //    nextZ + 0.5f
+    //};
 
-    hitTowerX = false;
-    hitTowerZ = false;
+    //hitTowerX = false;
+    //hitTowerZ = false;
+
+    CollisionEngine.collInit(Actor, dt);
+    
 
     for (auto& t : towers)
     {
-        if (CheckCollisionBoxes(t.box, xBox))
+        if (CheckCollisionBoxes(t.box, Actor->boxX))
         {
-            hitTowerX = true;
+            Actor->collideX = true;
         }
 
-        if (CheckCollisionBoxes(t.box, zBox))
+        if (CheckCollisionBoxes(t.box, Actor->boxZ))
         {
-            hitTowerZ = true;
+            Actor->collideX = true;
         }
 
-        if (hitTowerX || hitTowerZ)
+        if (Actor->collideX || Actor->collideZ)
         {
             break;
         }
@@ -662,42 +663,45 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
 
     for (auto& w : walls)
     {
-        if (CheckCollisionBoxes(w.box, xBox))
+        if (CheckCollisionBoxes(w.box, Actor->boxX))
         {
-            hitTowerX = true;
+            Actor->collideX = true;
         }
 
-        if (CheckCollisionBoxes(w.box, zBox))
+        if (CheckCollisionBoxes(w.box, Actor->boxZ))
         {
-            hitTowerZ = true;
+            Actor->collideX = true;
         }
 
-        if (hitTowerX || hitTowerZ)
+        if (Actor->collideX || Actor->collideZ)
         {
             break;
         }
     }
 
+    float nextX = CollisionEngine.getNextX();
+    float nextZ = CollisionEngine.getNextZ();
+
     //Movement
     if (hitTowerX && hitTowerZ)
     {
-        body->position.y += body->velocity.y * dt;
+        Actor->position.y += Actor->velocity.y * dt;
     }
     else if (hitTowerX && !hitTowerZ)
     {
-        body->position.y += body->velocity.y * dt;
-        body->position.z = nextZ;
+        Actor->position.y += Actor->velocity.y * dt;
+        Actor->position.z = nextZ;
     }
     else if (hitTowerZ && !hitTowerX)
     {
-        body->position.x = nextX;
-        body->position.y += body->velocity.y * dt;
+        Actor->position.x = nextX;
+        Actor->position.y += Actor->velocity.y * dt;
     }
     else if (!hitTowerX && !hitTowerZ)
     {
-        body->position.x = nextX;
-        body->position.y += body->velocity.y * dt;
-        body->position.z = nextZ;
+        Actor->position.x = nextX;
+        Actor->position.y += Actor->velocity.y * dt;
+        Actor->position.z = nextZ;
     }
 
     //Collision - Bullet vs Target
@@ -717,11 +721,11 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
     // 8. SIMPLE GROUND COLLISION COLLISION
     // --------------------------------------------------
 
-    if (body->position.y <= 0.0f)
+    if (Actor->position.y <= 0.0f)
     {
-        body->position.y = 0.0f;
-        body->velocity.y = 0.0f;
-        body->isGrounded = true;
+        Actor->position.y = 0.0f;
+        Actor->velocity.y = 0.0f;
+        Actor->isGrounded = true;
     }
 }
 
