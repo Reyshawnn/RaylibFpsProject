@@ -2,6 +2,10 @@
 
 void Input::setInputs(const char side, const char forward)
 {
+
+	inputs.x = (float)side;
+	inputs.y = (float)-forward;
+
 #if defined(NORMALIZE_INPUT)
 	if (side != 0 && forward != 0)
 	{
@@ -10,8 +14,7 @@ void Input::setInputs(const char side, const char forward)
 	}
 #endif
 
-	inputs.x = float(side);
-	inputs.y = float(-forward);
+	
 
 
 }
@@ -38,16 +41,22 @@ constexpr Vector3 Input::getForwardDirection() const
 	return forwardDir;
 }
 
-constexpr void Input::setFinalDirection()
+/*constexpr*/ void Input::setFinalDirection(float dt)
 {
-	finalDir = Vector3{
+	nextDir = Vector3{
 			inputs.x * rightDir.x + inputs.y * forwardDir.x,
 			0.0f,
 			inputs.x * rightDir.z + inputs.y * forwardDir.z
 	};
+
+	finalDir = Vector3Lerp(nextDir, finalDir, CONTROL * dt);
 	
 }
 
+/*constexpr*/ Vector3 Input::getFinalDirection() const
+{
+	return finalDir;
+}
 
 // Put this in final update function body->dir = Vector3Lerp(body->dir, desiredDir, CONTROL * dt);
 

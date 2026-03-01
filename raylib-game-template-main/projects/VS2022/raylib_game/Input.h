@@ -13,7 +13,8 @@ public:
 	void setDirection(const float lookX);
 	constexpr Vector3 getRightDirection() const;
 	constexpr Vector3 getForwardDirection() const;
-	constexpr void setFinalDirection();
+	/*constexpr*/ Vector3 getFinalDirection() const;
+	/*constexpr*/ void setFinalDirection(float dt);
 	
 
 private:
@@ -21,5 +22,6 @@ private:
 	Vector3 rightDir;
 	Vector3 forwardDir;
 	Vector3 finalDir;
+	Vector3 nextDir;
 };
  

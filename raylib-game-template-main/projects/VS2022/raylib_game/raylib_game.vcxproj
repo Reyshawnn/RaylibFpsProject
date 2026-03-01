@@ -371,7 +371,9 @@
     <ClInclude Include="Physics.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\raylib_game.cpp" />
+    <ClCompile Include="..\..\..\src\raylib_game.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Owner\Desktop\remoteProject\raylib-game-template-main\projects\VS2022\raylib_game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="..\raylib\Map.cpp" />
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="Bullet.cpp" />

@@ -11,6 +11,8 @@
 #include "Random.h"
 
 #include <format>
+
+#include "Input.h"
 //----------------------------------------------------------------------------------
 // Defines and Macros
 //----------------------------------------------------------------------------------
@@ -81,6 +83,7 @@ struct Body {
     bool isGrounded{};
     bool hasShot{};
     BoundingBox box{};
+    Input input{};
     std::array<Bullet, 4> ammoList{};
 
 };
@@ -167,6 +170,7 @@ static Tower wallFour{
 
 
 static std::vector<Tower> walls{ wallOne,wallTwo,wallThree,wallFour };
+
 
 
 
@@ -462,14 +466,15 @@ int main(void)
 
 
 
-        //std::cout << player.position.x << " " << player.position.y << " " << player.position.z << "\n";
+        
        // std::cout << camera.target.x << " " << camera.target.y << " " << camera.target.z;
         //std::cout << "Player Pos: " << player.position.x << " " << player.position.y << " " << player.position.z << "\n";
         //std::cout << towers[0].box.min.x << " " << towers[0].box.min.y << " " << towers[0].box.min.z << "\n";
         /*std::cout << "Tower X COLL: " << hitTowerX << " Tower Z COLL: " << hitTowerZ << "\n";*/
         //std::cout << "State of position:  " << player.ammoList[0].position.x << " " << player.ammoList[0].position.y << " " << player.ammoList[0].position.z << " " << (int)player.ammoList[0].state <<  "\n";
-        std::cout << "Hit Tower X: " << hitTowerX << " " << "Hit Tower Z: " << hitTowerZ;
-        std::cout << " " << "Hit Wall X: " << hitWallX << " " << "Hit Wall Z: " << hitWallZ << "\n";
+   /*     std::cout << "Hit Tower X: " << hitTowerX << " " << "Hit Tower Z: " << hitTowerZ;
+        std::cout << " " << "Hit Wall X: " << hitWallX << " " << "Hit Wall Z: " << hitWallZ << "\n";*/
+        
         EndDrawing();
 
         //----------------------------------------------------------------------------------
@@ -493,12 +498,14 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
     // 1. INPUT (PLAYER LOCAL SPACE) INPUT
     // --------------------------------------------------
 
-    Vector2 input = { (float)side, (float)-forward };
+    //Vector2 input = { (float)side, (float)-forward };
 
-#if defined(NORMALIZE_INPUT)
-    if (side != 0 && forward != 0)
-        input = Vector2Normalize(input);
-#endif
+    body->input.setInputs(side, forward);
+
+//#if defined(NORMALIZE_INPUT)
+//    if (side != 0 && forward != 0)
+//        input = Vector2Normalize(input);
+//#endif
 
     float dt = GetFrameTime();
 
@@ -521,7 +528,7 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
     // 3. BUILD PLAYER BASIS (ROTATED COORDINATE SYSTEM) - Input
     // --------------------------------------------------
 
-    Vector3 forwardDir = {
+   /* Vector3 forwardDir = {
         sinf(yaw),
         0.0f,
         cosf(yaw)
@@ -531,21 +538,25 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
         cosf(-yaw),
         0.0f,
         sinf(-yaw)
-    };
+    };*/
+
+    body->input.setDirection(yaw);
 
 
     // --------------------------------------------------
     // 4. TRANSFORM INPUT → WORLD SPACE DIRECTION INPUT - Input
     // --------------------------------------------------
 
-    Vector3 desiredDir = {
+  /*  Vector3 desiredDir = {
         input.x * rightDir.x + input.y * forwardDir.x,
         0.0f,
         input.x * rightDir.z + input.y * forwardDir.z
     };
 
-    body->dir = Vector3Lerp(body->dir, desiredDir, CONTROL * dt);
+    body->dir = Vector3Lerp(body->dir, desiredDir, CONTROL * dt);*/
 
+    body->input.setFinalDirection(dt);
+   
 
     // --------------------------------------------------
     // 5. APPLY FRICTION / AIR DRAG (WORLD SPACE) PHYS
@@ -567,7 +578,8 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
     // 6. ACCELERATION ALONG DESIRED DIRECTION PHYS
     // --------------------------------------------------
 
-    float currentSpeed = Vector3DotProduct(horizontalVelocity, body->dir);
+    Vector3 finalDir{ body->input.getFinalDirection() };
+    float currentSpeed = Vector3DotProduct(horizontalVelocity, finalDir);
 
     float maxSpeed = crouchHold ? CROUCH_SPEED : MAX_SPEED;
 
@@ -577,8 +589,11 @@ static void UpdateBody(Body* body, float yaw, char side, char forward, bool jump
         MAX_ACCEL * dt
     );
 
-    horizontalVelocity.x += body->dir.x * accel;
-    horizontalVelocity.z += body->dir.z * accel;
+    //horizontalVelocity.x += body->dir.x * accel; //Change dir.x to rightdir and z to forward fd
+    //horizontalVelocity.z += body->dir.z * accel;
+
+    horizontalVelocity.x += finalDir.x * accel;
+    horizontalVelocity.z += finalDir.z * accel; 
 
     body->velocity.x = horizontalVelocity.x;
     body->velocity.z = horizontalVelocity.z;
