@@ -15,7 +15,6 @@ struct Structure //may have to designate between wall or tower later but for now
     Vector3 position;
     Vector3 size;
     Color color;
-    int id;
     BoundingBox box;
 
 };

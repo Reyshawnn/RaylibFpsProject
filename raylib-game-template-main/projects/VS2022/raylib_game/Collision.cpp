@@ -72,9 +72,9 @@ void Collision::collBuilding(Actor* actor, std::vector<Structure>& buildings)
 
 }
 
-void Collision::collUpdate(std::vector<Actor>& actors,float dt)
+void Collision::collUpdate(std::vector<Actor*>& actors,float dt)
 {
-    for(auto& actor: actors)
+    /*for(auto& actor: actors)
     {
         if (actor.collideX && actor.collideZ)
         {
@@ -96,7 +96,34 @@ void Collision::collUpdate(std::vector<Actor>& actors,float dt)
             actor.position.y += actor.velocity.y * dt;
             actor.position.z = nextZ;
         }
+
+    }*/
+
+    for (Actor* actor: actors)
+    {
+
+        if (actor->collideX && actor->collideZ)
+        {
+            actor->position.y += actor->velocity.y * dt;
+        }
+        else if (actor->collideX && !actor->collideZ)
+        {
+            actor->position.y += actor->velocity.y * dt;
+            actor->position.z = nextZ;
+        }
+        else if (actor->collideZ && !actor->collideX)
+        {
+            actor->position.x = nextX;
+            actor->position.y += actor->velocity.y * dt;
+        }
+        else if (!actor->collideX && !actor->collideZ)
+        {
+            actor->position.x = nextX;
+            actor->position.y += actor->velocity.y * dt;
+            actor->position.z = nextZ;
+        }
     }
+
 }
 
 
@@ -108,3 +135,19 @@ float Collision::getNextZ() const
 {
     return nextZ;
 }
+
+
+void Collision::bulletCheck(Target& target, Actor* actor,std::vector<Vector3>& locations)
+{
+    for (auto& bullet : actor->ammoList)
+    {
+        if (CheckCollisionBoxes(bullet.box, target.box))
+        {
+            int randNum{ GetRandomValue(0,3) };
+            target.position = locations.at(randNum);
+            target.updateTarget();
+           // Send request to UI system hitString = std::format("Bullet Number {}, hit target!", bullet.bulletID);
+        }
+    }
+}
+
