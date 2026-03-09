@@ -12,17 +12,34 @@
 
 #include <format>
 
+#include "Actor.h"
+
+
 #include "Input.h"
 
 #include "Physics.h"
-
-#include "Actor.h"
 
 #include "Collision.h"
 
 #include "Map.h"
 
 #include "Target.h"
+
+
+/*
+
+TODO LIST - 
+Update code to use Actor.weapon object 
+
+Update Bullet collision with walls (check collision then switch state) 
+
+Update Game Type with drawing functions and whatnot 
+
+Start on the UI class 
+
+
+
+*/
 
 
 //----------------------------------------------------------------------------------
@@ -53,12 +70,12 @@
 
 
 
-struct Weapon
-{
-    Vector3 position;
-    Vector3 dir;
-
-};
+//struct Weapon //struct for weapon on screen
+//{
+//    Vector3 position;
+//    Vector3 dir;
+//
+//};
 
 //enum class BulletState
 //{
@@ -206,7 +223,7 @@ static void UpdateCameraFPS(Camera* camera, Weapon* weapon); //Sys?
 static void UpdateBody(Actor* actor, float yaw, char side, char forward, bool jumpPressed, bool crouchHold); //Game
 void AttachWeaponToCamera(Weapon* weapon, const Camera& camera); //Game
 void DrawCameraDebug(const Camera& camera, const Weapon& weapon); //Debug
-void updateBullet(Bullet& bullet); //Game
+
 
 
 
@@ -321,7 +338,7 @@ int main(void)
 
 
 
-
+        //Input Handling
         char sideway = (IsKeyDown(KEY_D) - IsKeyDown(KEY_A));
         char forward = (IsKeyDown(KEY_W) - IsKeyDown(KEY_S));
         bool crouching = IsKeyDown(KEY_LEFT_CONTROL);
@@ -360,7 +377,7 @@ int main(void)
 
 
 
-        if (IsKeyPressed(KEY_ENTER))
+        if (IsKeyPressed(KEY_ENTER)) //Input handling
         {
 
             if (player.ammoList.at(ammoIndex).state == BulletState::idle)
@@ -377,7 +394,7 @@ int main(void)
 
         }
 
-        for (auto& bullet : player.ammoList)
+        for (auto& bullet : player.ammoList) 
         {
 
             if (bullet.state == BulletState::idle)
@@ -444,12 +461,12 @@ int main(void)
         DrawSphere(weapon.position, 0.15f, RED); //weapon draw -> player.h
         DrawCubeV(t1.position, t1.size, BLUE); //target draw -> 
 
-        for (auto& bullet : player.ammoList)
+        for (auto& bullet : player.ammoList) // ->Game.h
         {
             if (bullet.state == BulletState::travel)
             {
                 DrawSphere(bullet.position, 1.0f, RED);
-                updateBullet(bullet);
+                
             }
         }
 
@@ -488,15 +505,9 @@ int main(void)
 
 
 
+       
         
-        /*std::cout << player.dir.x << " " << player.dir.y << " " << player.dir.z << "\n";*/
-        //std::cout << "Player Pos: " << player.position.x << " " << player.position.y << " " << player.position.z << "\n";
-        //std::cout << towers[0].box.min.x << " " << towers[0].box.min.y << " " << towers[0].box.min.z << "\n";
-        /*std::cout << "Tower X COLL: " << hitTowerX << " Tower Z COLL: " << hitTowerZ << "\n";*/
-        //std::cout << "State of position:  " << player.ammoList[0].position.x << " " << player.ammoList[0].position.y << " " << player.ammoList[0].position.z << " " << (int)player.ammoList[0].state <<  "\n";
-   /*     std::cout << "Hit Tower X: " << hitTowerX << " " << "Hit Tower Z: " << hitTowerZ;
-        std::cout << " " << "Hit Wall X: " << hitWallX << " " << "Hit Wall Z: " << hitWallZ << "\n";*/
-        std::cout << std::boolalpha << "Player Grounded flag: " << player.isGrounded << " Player jump pressed: " << player.jumpPressed << "\n";
+  
         EndDrawing();
 
         //----------------------------------------------------------------------------------
@@ -514,7 +525,7 @@ int main(void)
 // Module Functions Definition
 //----------------------------------------------------------------------------------
 // Update body considering current world state
-static void UpdateBody(Actor* Actor, float yaw, char side, char forward, bool jumpPressed, bool crouchHold)
+static void UpdateBody(Actor* Actor, float yaw, char side, char forward, bool jumpPressed, bool crouchHold) //-> Game.h
 {
     
     Actor->input.setInputs(side, forward,jumpPressed);
@@ -543,15 +554,21 @@ static void UpdateBody(Actor* Actor, float yaw, char side, char forward, bool ju
     CollisionEngine.collUpdate(actors, dt);
     
     
-    for (auto actor : actors)
+    for (auto& actor : actors)
     {
         CollisionEngine.bulletCheck(t1, actor, targetLocations);
+        for (int i{}; i < actor->ammoList.size(); i++)
+        {
+           /* actor->bulletHandle(i);*/
+            actor->ammoList.at(i).updateBullet();
+        }
     }
+
 
 }
 
 
-// Update camera for FPS behaviour
+// Update camera for FPS behaviour -->May remove because  I don't understand it lol
 static void UpdateCameraFPS(Camera* camera, Weapon* weapon)
 {
     const Vector3 up = Vector3{ 0.0f, 1.0f, 0.0f };
@@ -595,18 +612,10 @@ static void UpdateCameraFPS(Camera* camera, Weapon* weapon)
     camera->position = Vector3Add(camera->position, Vector3Scale(bobbing, walkLerp));
     camera->target = Vector3Add(camera->position, pitch);
 
-    /*
-     weapon->position = camera->target;
-     if (weapon->position.z > 10.0f)
-         weapon->position.z = 5.0f;
-
-     if (weapon->position.x > 10.0f)
-         weapon->position.x = 5.0f;
-
-     weapon->position.y = camera->position.y-1.0f;*/
+   
 }
 
-// Draw game level
+// Draw game level --> Game.h Will process data from Map Objects
 static void DrawLevel(void)
 {
     const int floorExtent = 100;
@@ -736,21 +745,5 @@ void DrawCameraDebug(const Camera& camera, const Weapon& weapon)
 
 }
 
-void updateBullet(Bullet& bullet)
-{
-    float dt{ GetFrameTime() };
-    bullet.position += (bullet.dir * bullet.velocity * dt);
-    for (auto& bullet : player.ammoList)
-    {
-        bullet.box.min = { bullet.position.x - bullet.size.x * 0.5f,
-        bullet.position.y - bullet.size.y * 0.5f,
-         bullet.position.z - bullet.size.z * 0.5f
-        };
 
-        bullet.box.max = { bullet.position.x + bullet.size.x * 0.5f,
-        bullet.position.y + bullet.size.y * 0.5f,
-        bullet.position.z + bullet.size.z * 0.5f
-        };
-    }
-}
 

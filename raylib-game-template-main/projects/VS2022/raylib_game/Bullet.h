@@ -1,5 +1,9 @@
 #pragma once
 #include "raylib.h"
+#include "raymath.h"
+
+
+
 
 enum class BulletState
 {
@@ -18,5 +22,12 @@ struct Bullet
     Vector3 size{};
     BoundingBox box;
     int bulletID{};
+    void updateBullet();
+
 };
 
+struct Weapon
+{
+    Vector3 position;
+    Vector3 dir;
+};

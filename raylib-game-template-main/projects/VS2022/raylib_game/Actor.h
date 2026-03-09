@@ -31,6 +31,9 @@ struct Actor
     
     Input input;
     
+    Weapon weapon; //object for drawing weapon in player model space
+
+    void bulletHandle(int index);
 };
 
 class Action //Abstract class for Actions

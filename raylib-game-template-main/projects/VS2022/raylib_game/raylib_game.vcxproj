@@ -364,12 +364,14 @@
     <ClInclude Include="Actor.h" />
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="Debug.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="Movement.h" />
     <ClInclude Include="Physics.h" />
     <ClInclude Include="Target.h" />
+    <ClInclude Include="UI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\raylib_game.cpp">
@@ -379,11 +381,13 @@
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="Debug.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Movement.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Target.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\raylib_game.rc" />
