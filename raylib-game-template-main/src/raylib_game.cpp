@@ -684,7 +684,7 @@ static void shoot(Weapon* weapon)
 
 
 
-void AttachWeaponToCamera(Weapon* weapon, const Camera& camera)
+void AttachWeaponToCamera(Weapon* weapon, const Camera& camera) //-> Game.h
 {
     // --------------------------------------------------
     // 1. Build camera basis (WORLD SPACE)

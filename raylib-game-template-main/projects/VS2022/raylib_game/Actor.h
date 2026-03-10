@@ -4,6 +4,7 @@
 #include "Input.h"
 #include <array>
 
+#define BOTTOM_HEIGHT    0.5f
 
 
 
@@ -32,6 +33,10 @@ struct Actor
     Input input;
     
     Weapon weapon; //object for drawing weapon in player model space
+
+    Camera camera;
+
+    Vector2 lookRotation;
 
     void bulletHandle(int index);
 };
