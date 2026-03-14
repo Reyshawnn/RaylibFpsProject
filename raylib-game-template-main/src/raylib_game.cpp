@@ -25,18 +25,26 @@
 
 #include "Target.h"
 
+#include "Game.h"
+
 
 /*
 
 TODO LIST - 
-Update code to use Actor.weapon object 
 
-Update Bullet collision with walls (check collision then switch state) 
-
-Update Game Type with drawing functions and whatnot 
+Update Bullet collision with walls (check collision then switch state)  
 
 Start on the UI class 
 
+Command design pattern implementation 
+
+A 2nd weapon (Maybe draw a blue cube) and give it a ray collision implementation (like a automatic weapon) 
+
+add basic sound / textures
+
+Put the draw level class into Game 
+
+Research making my own map files 
 
 
 */
@@ -124,11 +132,11 @@ struct Tower
 
 
 // Weapon offset relative to camera (LOCAL space)
-static const Vector3 WEAPON_OFFSET = {
-    0.35f,  // right
-   -0.30f,  // down
-    0.90f   // forward
-};
+//static const Vector3 WEAPON_OFFSET = {
+//    0.35f,  // right
+//   -0.30f,  // down
+//    0.90f   // forward
+//};
 
 //
 //DrawCubeV(Vector3{ -2.75f,8.15f,-55.0f }, Vector3{ 100.0f,17.0f,2.0f }, BROWN);
@@ -150,11 +158,12 @@ static float walkLerp = 0.0f;
 static float headLerp = STAND_HEIGHT;
 static Vector2 lean = { 0 };
 static Weapon weapon{};
-static Bullet currBullet{};
-static bool bulletSpawn{ false };
+//tatic Bullet currBullet{};
+//static bool bulletSpawn{ false };
 static Physics PhysicsEngine{};
 static Collision CollisionEngine{};
 static std::vector<Actor*> actors{ playerPtr };
+static Game game{};
 
 //Map
 static const Vector3 towerSize = Vector3{ 16.0f, 32.0f, 16.0f };
@@ -219,10 +228,10 @@ static std::vector<Structure> walls{ wallOne,wallTwo,wallThree,wallFour };
 // Module Functions Declaration
 //----------------------------------------------------------------------------------
 static void DrawLevel(void); //Map
-static void UpdateCameraFPS(Camera* camera, Weapon* weapon); //Sys?
+//static void UpdateCameraFPS(Camera* camera, Weapon* weapon); //Sys?
 static void UpdateBody(Actor* actor, float yaw, char side, char forward, bool jumpPressed, bool crouchHold); //Game
-void AttachWeaponToCamera(Weapon* weapon, const Camera& camera); //Game
-void DrawCameraDebug(const Camera& camera, const Weapon& weapon); //Debug
+//void AttachWeaponToCamera(Weapon* weapon, const Camera& camera); //Game
+//void DrawCameraDebug(const Camera& camera, const Weapon& weapon); //Debug
 
 
 
@@ -246,15 +255,16 @@ int main(void)
 
     // Initialize camera variables
     // NOTE: UpdateCameraFPS() takes care of the rest
-    Camera camera = { 0 };
+    /*Camera camera = { 0 };
     camera.fovy = 60.0f;
     camera.projection = CAMERA_PERSPECTIVE;
     camera.position = Vector3{
         player.position.x,
         player.position.y + (BOTTOM_HEIGHT + headLerp),
         player.position.z,
-    };
+    };*/
 
+    game.cameraSetup(&player);
 
    // currBullet.velocity = Vector3{ 60.0f,60.f,60.f };
 
@@ -294,7 +304,8 @@ int main(void)
 
     size_t ammoIndex{};
 
-    UpdateCameraFPS(&camera, &weapon); // Update camera parameters
+   // UpdateCameraFPS(&player, &weapon); // Update camera parameters
+    game.UpdateCameraFPS(&player);
 
 
 
@@ -331,8 +342,9 @@ int main(void)
         // Update -- Multiple things are being updated Player Inputs, New position calculations,etc
         //----------------------------------------------------------------------------------
         Vector2 mouseDelta = GetMouseDelta();
-        lookRotation.x -= mouseDelta.x * sensitivity.x;
-        lookRotation.y += mouseDelta.y * sensitivity.y;
+        float delta = GetFrameTime();
+        player.lookRotation.x -= mouseDelta.x * sensitivity.x;
+        player.lookRotation.y += mouseDelta.y * sensitivity.y;
 
 
 
@@ -348,11 +360,11 @@ int main(void)
          
 
 
-        UpdateBody(&player, lookRotation.x, sideway, forward, IsKeyPressed(KEY_SPACE),crouching);
+        UpdateBody(&player, player.lookRotation.x, sideway, forward, IsKeyPressed(KEY_SPACE),crouching);
 
 
 
-        float delta = GetFrameTime();
+       /* ;
 
         headLerp = Lerp(headLerp, (crouching ? CROUCH_HEIGHT : STAND_HEIGHT), 20.0f * delta);
 
@@ -360,9 +372,11 @@ int main(void)
             player.position.x,
             player.position.y + (BOTTOM_HEIGHT + headLerp),
             player.position.z,
-        };
+        };*/
 
-        if (player.isGrounded && ((forward != 0) || (sideway != 0)))
+        game.UpdateCamera(&player, delta);
+
+    /*    if (player.isGrounded && ((forward != 0) || (sideway != 0)))
         {
             headTimer += delta * 3.0f;
             walkLerp = Lerp(walkLerp, 1.0f, 10.0f * delta);
@@ -372,7 +386,7 @@ int main(void)
         {
             walkLerp = Lerp(walkLerp, 0.0f, 10.0f * delta);
             camera.fovy = Lerp(camera.fovy, 60.0f, 5.0f * delta);
-        }
+        }*/
 
 
 
@@ -394,56 +408,56 @@ int main(void)
 
         }
 
-        for (auto& bullet : player.ammoList) 
-        {
+        //for (auto& bullet : player.ammoList) 
+        //{
 
-            if (bullet.state == BulletState::idle)
-            {
-                continue;
-            }
-            else if (bullet.state == BulletState::fired)
-            {
-                bullet.dir = weapon.dir;
-                bullet.position = weapon.position;
-                bullet.state = BulletState::travel;
-            }
-            else if (bullet.state == BulletState::travel)
-            {
-                if (bullet.position.x >= 50.0f || bullet.position.x <= -50.0f)
-                {
+        //    if (bullet.state == BulletState::idle)
+        //    {
+        //        continue;
+        //    }
+        //    else if (bullet.state == BulletState::fired)
+        //    {
+        //        bullet.dir = weapon.dir;
+        //        bullet.position = weapon.position;
+        //        bullet.state = BulletState::travel;
+        //    }
+        //    else if (bullet.state == BulletState::travel)
+        //    {
+        //        if (bullet.position.x >= 50.0f || bullet.position.x <= -50.0f)
+        //        {
 
-                    bullet.state = BulletState::hit;
-                }
-                else if (bullet.position.y >= 50.0f || bullet.position.y <= 0.0f)
-                {
+        //            bullet.state = BulletState::hit;
+        //        }
+        //        else if (bullet.position.y >= 50.0f || bullet.position.y <= 0.0f)
+        //        {
 
-                    bullet.state = BulletState::hit;
-                }
+        //            bullet.state = BulletState::hit;
+        //        }
 
-                else if (bullet.position.z >= 50.0f || bullet.position.z <= -50.0f)
-                {
+        //        else if (bullet.position.z >= 50.0f || bullet.position.z <= -50.0f)
+        //        {
 
-                    bullet.state = BulletState::hit;
-                }
+        //            bullet.state = BulletState::hit;
+        //        }
 
-            }
-            else if (bullet.state == BulletState::hit)
-            {
-                //something cool here maybe animation or something 
-                bullet.state = BulletState::idle;
-            }
-
-
-
-        }
+        //    }
+        //    else if (bullet.state == BulletState::hit)
+        //    {
+        //        //something cool here maybe animation or something 
+        //        bullet.state = BulletState::idle;
+        //    }
 
 
-        lean.x = Lerp(lean.x, sideway * 0.02f, 10.0f * delta);
-        lean.y = Lerp(lean.y, forward * 0.015f, 10.0f * delta);
+
+        //}
+
+
+        player.lean.x = Lerp(player.lean.x, sideway * 0.02f, 10.0f * delta);
+        player.lean.y = Lerp(player.lean.y, forward * 0.015f, 10.0f * delta);
     
 
-        UpdateCameraFPS(&camera, &weapon);
-        AttachWeaponToCamera(&weapon, camera);
+        game.UpdateCameraFPS(&player);
+        game.AttachWeaponToCamera(&player);
 
         //----------------------------------------------------------------------------------
 
@@ -453,12 +467,12 @@ int main(void)
 
         ClearBackground(RAYWHITE);
 
-        BeginMode3D(camera);
+        BeginMode3D(player.camera);
 
 
         DrawLevel();
 
-        DrawSphere(weapon.position, 0.15f, RED); //weapon draw -> player.h
+        DrawSphere(player.weapon.position, 0.15f, RED); //weapon draw -> player.h
         DrawCubeV(t1.position, t1.size, BLUE); //target draw -> 
 
         for (auto& bullet : player.ammoList) // ->Game.h
@@ -559,7 +573,7 @@ static void UpdateBody(Actor* Actor, float yaw, char side, char forward, bool ju
         CollisionEngine.bulletCheck(t1, actor, targetLocations);
         for (int i{}; i < actor->ammoList.size(); i++)
         {
-           /* actor->bulletHandle(i);*/
+           actor->bulletHandle(i);
             actor->ammoList.at(i).updateBullet();
         }
     }
@@ -569,51 +583,51 @@ static void UpdateBody(Actor* Actor, float yaw, char side, char forward, bool ju
 
 
 // Update camera for FPS behaviour -->May remove because  I don't understand it lol
-static void UpdateCameraFPS(Camera* camera, Weapon* weapon)
-{
-    const Vector3 up = Vector3{ 0.0f, 1.0f, 0.0f };
-    const Vector3 targetOffset = Vector3{ 0.0f, 0.0f, -1.0f };
-
-    // Left and right
-    Vector3 yaw = Vector3RotateByAxisAngle(targetOffset, up, lookRotation.x);
-
-    // Clamp view up
-    float maxAngleUp = Vector3Angle(up, yaw);
-    maxAngleUp -= 0.001f; // Avoid numerical errors
-    if (-(lookRotation.y) > maxAngleUp) { lookRotation.y = -maxAngleUp; }
-
-    // Clamp view down
-    float maxAngleDown = Vector3Angle(Vector3Negate(up), yaw);
-    maxAngleDown *= -1.0f; // Downwards angle is negative
-    maxAngleDown += 0.001f; // Avoid numerical errors
-    if (-(lookRotation.y) < maxAngleDown) { lookRotation.y = -maxAngleDown; }
-
-    // Up and down
-    Vector3 right = Vector3Normalize(Vector3CrossProduct(yaw, up));
-
-    // Rotate view vector around right axis
-    float pitchAngle = -lookRotation.y - lean.y;
-    pitchAngle = Clamp(pitchAngle, -PI / 2 + 0.0001f, PI / 2 - 0.0001f); // Clamp angle so it doesn't go past straight up or straight down
-    Vector3 pitch = Vector3RotateByAxisAngle(yaw, right, pitchAngle);
-
-    // Head animation
-    // Rotate up direction around forward axis
-    float headSin = sinf(headTimer * PI);
-    float headCos = cosf(headTimer * PI);
-    const float stepRotation = 0.01f;
-    camera->up = Vector3RotateByAxisAngle(up, pitch, headSin * stepRotation + lean.x);
-
-    // Camera BOB
-    const float bobSide = 0.1f;
-    const float bobUp = 0.15f;
-    Vector3 bobbing = Vector3Scale(right, headSin * bobSide);
-    bobbing.y = fabsf(headCos * bobUp);
-
-    camera->position = Vector3Add(camera->position, Vector3Scale(bobbing, walkLerp));
-    camera->target = Vector3Add(camera->position, pitch);
-
-   
-}
+//static void UpdateCameraFPS(Camera* camera, Weapon* weapon)
+//{
+//    const Vector3 up = Vector3{ 0.0f, 1.0f, 0.0f };
+//    const Vector3 targetOffset = Vector3{ 0.0f, 0.0f, -1.0f };
+//
+//    // Left and right
+//    Vector3 yaw = Vector3RotateByAxisAngle(targetOffset, up, lookRotation.x);
+//
+//    // Clamp view up
+//    float maxAngleUp = Vector3Angle(up, yaw);
+//    maxAngleUp -= 0.001f; // Avoid numerical errors
+//    if (-(lookRotation.y) > maxAngleUp) { lookRotation.y = -maxAngleUp; }
+//
+//    // Clamp view down
+//    float maxAngleDown = Vector3Angle(Vector3Negate(up), yaw);
+//    maxAngleDown *= -1.0f; // Downwards angle is negative
+//    maxAngleDown += 0.001f; // Avoid numerical errors
+//    if (-(lookRotation.y) < maxAngleDown) { lookRotation.y = -maxAngleDown; }
+//
+//    // Up and down
+//    Vector3 right = Vector3Normalize(Vector3CrossProduct(yaw, up));
+//
+//    // Rotate view vector around right axis
+//    float pitchAngle = -lookRotation.y - lean.y;
+//    pitchAngle = Clamp(pitchAngle, -PI / 2 + 0.0001f, PI / 2 - 0.0001f); // Clamp angle so it doesn't go past straight up or straight down
+//    Vector3 pitch = Vector3RotateByAxisAngle(yaw, right, pitchAngle);
+//
+//    // Head animation
+//    // Rotate up direction around forward axis
+//    float headSin = sinf(headTimer * PI);
+//    float headCos = cosf(headTimer * PI);
+//    const float stepRotation = 0.01f;
+//    camera->up = Vector3RotateByAxisAngle(up, pitch, headSin * stepRotation + lean.x);
+//
+//    // Camera BOB
+//    const float bobSide = 0.1f;
+//    const float bobUp = 0.15f;
+//    Vector3 bobbing = Vector3Scale(right, headSin * bobSide);
+//    bobbing.y = fabsf(headCos * bobUp);
+//
+//    camera->position = Vector3Add(camera->position, Vector3Scale(bobbing, walkLerp));
+//    camera->target = Vector3Add(camera->position, pitch);
+//
+//   
+//}
 
 // Draw game level --> Game.h Will process data from Map Objects
 static void DrawLevel(void)
@@ -671,79 +685,79 @@ static void DrawLevel(void)
 }
 
 
-static void shoot(Weapon* weapon)
-{
-    Vector3 bulletPos{ weapon->position };
-
-    DrawSphere(bulletPos, 1.0f, RED);
-
-
-
-
-}
-
-
-
-void AttachWeaponToCamera(Weapon* weapon, const Camera& camera) //-> Game.h
-{
-    // --------------------------------------------------
-    // 1. Build camera basis (WORLD SPACE)
-    // --------------------------------------------------
-
-    // Forward direction (camera look vector)
-    Vector3 forward = Vector3Normalize(
-        Vector3Subtract(camera.target, camera.position)
-    );
-
-    // Right direction
-    Vector3 right = Vector3Normalize(
-        Vector3CrossProduct(forward, camera.up)
-    );
-
-    // Up direction (already correct)
-    Vector3 up = camera.up;
-
-    // --------------------------------------------------
-    // 2. Convert local offset → world offset
-    // --------------------------------------------------
-    Vector3 worldOffset = { 0 };
-
-    worldOffset = Vector3Add(worldOffset, Vector3Scale(right, WEAPON_OFFSET.x));
-    worldOffset = Vector3Add(worldOffset, Vector3Scale(up, WEAPON_OFFSET.y));
-    worldOffset = Vector3Add(worldOffset, Vector3Scale(forward, WEAPON_OFFSET.z));
-
-    // --------------------------------------------------
-    // 3. Final weapon position
-    // --------------------------------------------------
-    weapon->position = Vector3Add(camera.position, worldOffset);
-
-    // --------------------------------------------------
-    // 4. Weapon forward direction (for shooting)
-    // --------------------------------------------------
-    weapon->dir = forward;
-}
-
-void DrawCameraDebug(const Camera& camera, const Weapon& weapon)
-{
-    const float AXIS_LEN = 2.0f;
-
-    // Camera forward (RED)
-    /*Vector3 forward = Vector3Normalize(
-        Vector3Subtract(camera.target, camera.position)
-    );*/
-
-    Vector3 forward = { 0, 0, -1 };
-
-    // Camera right (GREEN)
-    Vector3 right = Vector3Normalize(
-        Vector3CrossProduct(forward, camera.up)
-    );
-
-    // Camera up (BLUE)
-    Vector3 up = Vector3Normalize(camera.up);
+//static void shoot(Weapon* weapon)
+//{
+//    Vector3 bulletPos{ weapon->position };
+//
+//    DrawSphere(bulletPos, 1.0f, RED);
+//
+//
+//
+//
+//}
 
 
-}
+
+//void AttachWeaponToCamera(Weapon* weapon, const Camera& camera) //-> Game.h
+//{
+//    // --------------------------------------------------
+//    // 1. Build camera basis (WORLD SPACE)
+//    // --------------------------------------------------
+//
+//    // Forward direction (camera look vector)
+//    Vector3 forward = Vector3Normalize(
+//        Vector3Subtract(camera.target, camera.position)
+//    );
+//
+//    // Right direction
+//    Vector3 right = Vector3Normalize(
+//        Vector3CrossProduct(forward, camera.up)
+//    );
+//
+//    // Up direction (already correct)
+//    Vector3 up = camera.up;
+//
+//    // --------------------------------------------------
+//    // 2. Convert local offset → world offset
+//    // --------------------------------------------------
+//    Vector3 worldOffset = { 0 };
+//
+//    worldOffset = Vector3Add(worldOffset, Vector3Scale(right, WEAPON_OFFSET.x));
+//    worldOffset = Vector3Add(worldOffset, Vector3Scale(up, WEAPON_OFFSET.y));
+//    worldOffset = Vector3Add(worldOffset, Vector3Scale(forward, WEAPON_OFFSET.z));
+//
+//    // --------------------------------------------------
+//    // 3. Final weapon position
+//    // --------------------------------------------------
+//    weapon->position = Vector3Add(camera.position, worldOffset);
+//
+//    // --------------------------------------------------
+//    // 4. Weapon forward direction (for shooting)
+//    // --------------------------------------------------
+//    weapon->dir = forward;
+//}
+//
+//void DrawCameraDebug(const Camera& camera, const Weapon& weapon)
+//{
+//    const float AXIS_LEN = 2.0f;
+//
+//    // Camera forward (RED)
+//    /*Vector3 forward = Vector3Normalize(
+//        Vector3Subtract(camera.target, camera.position)
+//    );*/
+//
+//    Vector3 forward = { 0, 0, -1 };
+//
+//    // Camera right (GREEN)
+//    Vector3 right = Vector3Normalize(
+//        Vector3CrossProduct(forward, camera.up)
+//    );
+//
+//    // Camera up (BLUE)
+//    Vector3 up = Vector3Normalize(camera.up);
+//
+//
+//}
 
 
 

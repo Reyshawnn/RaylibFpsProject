@@ -4,7 +4,8 @@
 #include "Input.h"
 #include <array>
 
-#define BOTTOM_HEIGHT    0.5f
+
+
 
 
 
@@ -37,6 +38,7 @@ struct Actor
     Camera camera;
 
     Vector2 lookRotation;
+    Vector2 lean;
 
     void bulletHandle(int index);
 };

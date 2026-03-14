@@ -1,6 +1,15 @@
 ﻿#include "Game.h"
+
+
+
 void Game::AttachWeaponToCamera(Actor* actor)
 {
+    Vector3 WEAPON_POS = {
+    0.35f,  // right
+   -0.30f,  // down
+    0.90f   // forward
+    };
+
     // --------------------------------------------------
    // 1. Build camera basis (WORLD SPACE)
    // --------------------------------------------------
@@ -23,9 +32,9 @@ void Game::AttachWeaponToCamera(Actor* actor)
     // --------------------------------------------------
     Vector3 worldOffset = { 0 };
 
-    worldOffset = Vector3Add(worldOffset, Vector3Scale(right, WEAPON_OFFSET.x));
-    worldOffset = Vector3Add(worldOffset, Vector3Scale(up, WEAPON_OFFSET.y));
-    worldOffset = Vector3Add(worldOffset, Vector3Scale(forward, WEAPON_OFFSET.z));
+    worldOffset = Vector3Add(worldOffset, Vector3Scale(right, WEAPON_POS.x));
+    worldOffset = Vector3Add(worldOffset, Vector3Scale(up, WEAPON_POS.y));
+    worldOffset = Vector3Add(worldOffset, Vector3Scale(forward, WEAPON_POS.z));
 
     // --------------------------------------------------
     // 3. Final weapon position
@@ -72,7 +81,7 @@ void Game::UpdateCameraFPS(Actor* actor)
     Vector3 right = Vector3Normalize(Vector3CrossProduct(yaw, up));
 
     // Rotate view vector around right axis
-    float pitchAngle = -actor->lookRotation.y - lean.y;
+    float pitchAngle = -actor->lookRotation.y - actor->lean.y;
     pitchAngle = Clamp(pitchAngle, -PI / 2 + 0.0001f, PI / 2 - 0.0001f); // Clamp angle so it doesn't go past straight up or straight down
     Vector3 pitch = Vector3RotateByAxisAngle(yaw, right, pitchAngle);
 
@@ -81,7 +90,7 @@ void Game::UpdateCameraFPS(Actor* actor)
     float headSin = sinf(headTimer * PI);
     float headCos = cosf(headTimer * PI);
     const float stepRotation = 0.01f;
-    camera->up = Vector3RotateByAxisAngle(up, pitch, headSin * stepRotation + lean.x);
+    actor->camera.up = Vector3RotateByAxisAngle(up, pitch, headSin * stepRotation + actor->lean.x);
 
     // Camera BOB
     const float bobSide = 0.1f;
@@ -89,8 +98,19 @@ void Game::UpdateCameraFPS(Actor* actor)
     Vector3 bobbing = Vector3Scale(right, headSin * bobSide);
     bobbing.y = fabsf(headCos * bobUp);
 
-    camera->position = Vector3Add(camera->position, Vector3Scale(bobbing, walkLerp));
-    camera->target = Vector3Add(camera->position, pitch);
+    actor->camera.position = Vector3Add(actor->camera.position, Vector3Scale(bobbing, walkLerp));
+    actor->camera.target = Vector3Add(actor->camera.position, pitch);
 
 
+}
+
+void Game::UpdateCamera(Actor* actor, float dt)
+{
+    headLerp = Lerp(headLerp, (actor->isCrouched ? bottomHeight : standHeight), 20.0f * dt);
+
+    actor->camera.position = Vector3{
+        actor->position.x,
+        actor->position.y + (bottomHeight + headLerp),
+        actor->position.z,
+    };
 }
