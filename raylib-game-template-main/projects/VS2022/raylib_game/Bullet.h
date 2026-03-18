@@ -35,3 +35,5 @@ struct Weapon
     Vector3 position;
     Vector3 dir;
 };
+
+std::ostream& operator<<(std::ostream& out, BulletState state);

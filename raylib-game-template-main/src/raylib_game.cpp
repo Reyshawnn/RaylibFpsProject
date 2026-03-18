@@ -47,34 +47,6 @@ Research making my own map files
 
 */
 
-
-//----------------------------------------------------------------------------------
-// Defines and Macros
-//----------------------------------------------------------------------------------
-// Movement constants
-#define GRAVITY         32.0f
-#define MAX_SPEED       20.0f
-#define CROUCH_SPEED     5.0f
-#define JUMP_FORCE      12.0f
-#define MAX_ACCEL      150.0f
-// Grounded drag
-#define FRICTION         0.86f
-// Increasing air drag, increases strafing speed
-#define AIR_DRAG         0.98f
-// Responsiveness for turning movement direction to looked direction
-#define CONTROL         15.0f
-#define CROUCH_HEIGHT    0.0f
-#define STAND_HEIGHT     1.0f
-#define BOTTOM_HEIGHT    0.5f
-
-#define NORMALIZE_INPUT  0
-
-//----------------------------------------------------------------------------------
-// Types and Structures Definition
-//----------------------------------------------------------------------------------
-// Body structure
-
-
 struct Tower
 {
     Vector3 position;
@@ -101,9 +73,6 @@ static Vector2 sensitivity = { 0.001f, 0.001f };
 static Actor player = { 0 };
 static Actor* playerPtr{ &player };
 static Vector2 lookRotation = { 0 };
-static float headTimer = 0.0f;
-static float walkLerp = 0.0f;
-static float headLerp = STAND_HEIGHT;
 static Vector2 lean = { 0 };
 static Weapon weapon{};
 static Physics PhysicsEngine{};
@@ -115,10 +84,12 @@ static Game game{};
 static const Vector3 towerSize = Vector3{ 16.0f, 32.0f, 16.0f };
 
 static std::vector<Structure> towers{ 
+//Towers
 Structure{{20.0f, 16.0f, 20.0f},towerSize,RED},
 Structure{{-20.0f, 16.0f, 20.0f},towerSize,BLUE},
 Structure{{20.0f, 16.0f, -20.0f},towerSize,GREEN},
 Structure{{-20.0f, 16.0f, -20.0f},towerSize,YELLOW},
+//Walls
 Structure{ { -2.75f, 8.15f, -55.0f },{ 100.0f, 17.0f, 2.0f },BROWN},
 Structure{ { 48.5f, 8.15f, -5.0f },{ 2.0f, 17.0f, 105.0f }, GRAY},
 Structure{{ 1.25f, 8.15f, 48.5f },{ 108.0f, 17.0f, 2.0f },BLACK, 3},
@@ -387,7 +358,7 @@ int main(void)
         }
 
 
-        std::cout << static_cast<std::string>(player.ammoList.at(0).state) << "\n";
+        std::cout << player.ammoList.at(0).state << "\n";
        
         
   
@@ -403,12 +374,6 @@ int main(void)
 
     return 0;
 }
-
-//----------------------------------------------------------------------------------
-// Module Functions Definition
-//----------------------------------------------------------------------------------
-// Update body considering current world state
-
 
 // Draw game level --> Game.h Will process data from Map Objects
 static void DrawLevel(void)

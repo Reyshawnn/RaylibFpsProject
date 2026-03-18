@@ -158,7 +158,7 @@ void Collision::bulletWallCheck(Actor* actor, std::vector<Structure>& walls)
     {
         for (auto& building : walls)
         {
-            if (CheckCollisionBoxes(bullet.box, building.box) && bullet.state != BulletState::idle)
+            if (CheckCollisionBoxes(bullet.box, building.box) && bullet.state == BulletState::travel)
             {
                 bullet.state = BulletState::hit;
             }

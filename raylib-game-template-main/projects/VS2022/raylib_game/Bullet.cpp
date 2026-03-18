@@ -35,6 +35,31 @@ void Bullet::reset()
     position.y = 0.0f;
     position.z = 0.0f;
 
+
+
     state = BulletState::idle;
 
+}
+
+std::ostream& operator<<(std::ostream& out, BulletState state)
+{
+    switch (state)
+    {
+    case BulletState::idle:
+        out << "idle";
+        return out;
+
+    case BulletState::fired:
+        out << "fired";
+        return out;
+
+    case BulletState::travel:
+        out << "travel";
+        return out;
+
+    case BulletState::hit:
+        out << "hit";
+        return out;
+
+    }
 }

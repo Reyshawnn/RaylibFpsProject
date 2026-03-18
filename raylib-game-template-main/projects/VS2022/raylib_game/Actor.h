@@ -5,10 +5,6 @@
 #include <array>
 
 
-
-
-
-
 struct Actor
 {
     //Actor primitive fields
