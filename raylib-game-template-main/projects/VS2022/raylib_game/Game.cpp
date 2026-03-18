@@ -114,3 +114,55 @@ void Game::UpdateCamera(Actor* actor, float dt)
         actor->position.z,
     };
 }
+
+
+void Game::UpdateInputs(std::vector<Actor*>& actors, float yaw, char side, char forward, bool jumpPressed, bool crouchHold, float dt)
+{
+    for(auto& Actor: actors)
+    {
+
+        Actor->input.setInputs(side, forward, jumpPressed);
+        Actor->jumpPressed = Actor->input.getJump();
+        if (Actor->ID == "Player")
+        {
+            Actor->input.setDirection(yaw);
+        }
+        Actor->input.setFinalDirection(dt);
+        Actor->dir = Actor->input.getFinalDirection();
+    }
+}
+
+void Game::UpdatePhysandColl(std::vector<Actor*>& actors, Physics& PhysicsEngine, Collision& CollisionEngine, std::vector<Structure>& towers, float dt)
+{
+    for (auto& Actor : actors)
+    {
+        PhysicsEngine.horiVelo(Actor, dt);
+        PhysicsEngine.calcVelocity(Actor, dt);
+
+
+
+
+
+        CollisionEngine.collInit(Actor, dt);
+        CollisionEngine.collBuilding(Actor, towers);
+        CollisionEngine.groundCheck(Actor);
+
+
+        PhysicsEngine.jumpCheck(Actor, dt);
+        CollisionEngine.collUpdate(actors, dt);
+    }
+}
+
+void Game::UpdateCollision(std::vector<Actor*>& actors, std::vector<Vector3>& locations, std::vector<Structure>& towers, Collision& CollisionEngine, Target& t1)
+{
+    for (auto& actor : actors)
+    {
+        CollisionEngine.bulletCheck(t1, actor, locations);
+        CollisionEngine.bulletWallCheck(actor, towers);
+        for (int i{}; i < actor->ammoList.size(); i++)
+        {
+            actor->bulletHandle(i);
+            actor->ammoList.at(i).updateBullet();
+        }
+    }
+}

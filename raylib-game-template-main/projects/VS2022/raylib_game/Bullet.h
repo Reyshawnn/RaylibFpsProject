@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include "raymath.h"
+#include "iostream"
 
 
 
@@ -23,6 +24,9 @@ struct Bullet
     BoundingBox box;
     int bulletID{};
     void updateBullet();
+    friend std::ostream& operator<<(std::ostream&, const Bullet& bullet);
+    void reset();
+
 
 };
 

@@ -39,8 +39,12 @@ struct Actor
 
     Vector2 lookRotation;
     Vector2 lean;
+    std::string ID;
 
     void bulletHandle(int index);
+    void setID(std::string_view name);
+
+    
 };
 
 class Action //Abstract class for Actions

@@ -13,6 +13,7 @@ public:
 	void collBuilding(Actor* actor, std::vector<Structure>&buildings);
 	void collUpdate(std::vector<Actor*>& actors, float dt);
 	void bulletCheck(Target& target, Actor* actor, std::vector<Vector3>& locations);
+	void bulletWallCheck(Actor* actor, std::vector<Structure>& walls);
 	float getNextX() const;
 	float getNextZ() const;
 

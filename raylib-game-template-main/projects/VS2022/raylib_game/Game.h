@@ -2,6 +2,9 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "Actor.h"
+#include "Physics.h"
+#include "Collision.h"
+#include <vector>
 
 class Game
 {
@@ -10,6 +13,10 @@ public:
 	void cameraSetup(Actor* actor);
 	void UpdateCameraFPS(Actor* actor);
 	void UpdateCamera(Actor* actor, float dt);
+	void UpdateInputs(std::vector<Actor*>& actors,float yaw, char side, char forward, bool jumpPressed, bool crouchHold, float dt);
+	void UpdatePhysandColl(std::vector<Actor*>& actors,Physics& PhysicsEngine,Collision& CollisionEngine,std::vector<Structure>& towers,float dt);
+	void UpdateCollision(std::vector<Actor*>& actors,std::vector<Vector3>& locations ,std::vector<Structure>& towers,Collision& CollisionEngine, Target& t1);
+
 
 private:
 	float standHeight{ 1.0f };

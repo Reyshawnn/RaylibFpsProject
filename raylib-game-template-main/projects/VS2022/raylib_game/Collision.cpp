@@ -141,13 +141,29 @@ void Collision::bulletCheck(Target& target, Actor* actor,std::vector<Vector3>& l
 {
     for (auto& bullet : actor->ammoList)
     {
-        if (CheckCollisionBoxes(bullet.box, target.box))
+        if (CheckCollisionBoxes(bullet.box, target.box) && bullet.state != BulletState::idle)
         {
             int randNum{ GetRandomValue(0,3) };
             target.position = locations.at(randNum);
             target.updateTarget();
            // Send request to UI system hitString = std::format("Bullet Number {}, hit target!", bullet.bulletID);
         }
+
     }
 }
+
+void Collision::bulletWallCheck(Actor* actor, std::vector<Structure>& walls)
+{
+    for (auto& bullet : actor->ammoList)
+    {
+        for (auto& building : walls)
+        {
+            if (CheckCollisionBoxes(bullet.box, building.box) && bullet.state != BulletState::idle)
+            {
+                bullet.state = BulletState::hit;
+            }
+        }
+    }
+}
+
 
