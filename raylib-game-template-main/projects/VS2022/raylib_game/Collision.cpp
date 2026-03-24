@@ -139,7 +139,7 @@ float Collision::getNextZ() const
 
 void Collision::bulletCheck(Target& target, Actor* actor,std::vector<Vector3>& locations)
 {
-    for (auto& bullet : actor->ammoList)
+    for (auto& bullet : actor->weapon.ammoList)
     {
         if (CheckCollisionBoxes(bullet.box, target.box) && bullet.state != BulletState::idle)
         {
@@ -154,7 +154,7 @@ void Collision::bulletCheck(Target& target, Actor* actor,std::vector<Vector3>& l
 
 void Collision::bulletWallCheck(Actor* actor, std::vector<Structure>& walls)
 {
-    for (auto& bullet : actor->ammoList)
+    for (auto& bullet : actor->weapon.ammoList)
     {
         for (auto& building : walls)
         {

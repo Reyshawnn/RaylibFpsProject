@@ -2,6 +2,8 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "iostream"
+#include <vector>
+
 
 
 
@@ -34,6 +36,26 @@ struct Weapon
 {
     Vector3 position;
     Vector3 dir;
+    std::vector<Bullet> ammoList;
+    std::string numBullets{};
+
+    void notifyIdle()
+    {
+        int counter{};
+        for (auto& bullet : ammoList)
+        {
+            if (bullet.state == BulletState::idle)
+            {
+                counter += 1;
+            }
+        }
+
+
+        numBullets = static_cast<char>(counter + 48);
+    }
 };
+
+
+
 
 std::ostream& operator<<(std::ostream& out, BulletState state);

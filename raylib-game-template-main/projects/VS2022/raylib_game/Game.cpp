@@ -159,10 +159,10 @@ void Game::UpdateCollision(std::vector<Actor*>& actors, std::vector<Vector3>& lo
     {
         CollisionEngine.bulletCheck(t1, actor, locations);
         CollisionEngine.bulletWallCheck(actor, towers);
-        for (int i{}; i < actor->ammoList.size(); i++)
+        for (int i{}; i < actor->weapon.ammoList.size(); i++)
         {
             actor->bulletHandle(i);
-            actor->ammoList.at(i).updateBullet();
+            actor->weapon.ammoList.at(i).updateBullet();
         }
     }
 }

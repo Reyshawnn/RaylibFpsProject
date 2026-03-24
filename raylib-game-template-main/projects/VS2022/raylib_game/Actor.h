@@ -5,6 +5,12 @@
 #include <array>
 
 
+
+/*
+TODO:
+- Add a array of weapon objects intersting problem!!
+
+*/
 struct Actor
 {
     //Actor primitive fields
@@ -18,7 +24,6 @@ struct Actor
     bool isCrouched;
     bool jumpPressed;
 
-    std::array<Bullet, 4> ammoList;
 
     //Collision Fields
     bool collideX;
@@ -39,7 +44,7 @@ struct Actor
 
     void bulletHandle(int index);
     void setID(std::string_view name);
-
+    void setupWeapon();
     
 };
 

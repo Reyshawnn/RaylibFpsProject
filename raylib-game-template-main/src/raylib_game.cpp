@@ -227,9 +227,9 @@ int main(void)
     };
 
 
-    for (size_t i{}; i < player.ammoList.size(); i++)
+    for (size_t i{}; i < player.weapon.ammoList.size(); i++)
     {
-        player.ammoList.at(i).bulletID = static_cast<int>(i);
+        player.weapon.ammoList.at(i).bulletID = static_cast<int>(i);
     }
 
 
@@ -237,6 +237,9 @@ int main(void)
     DisableCursor();        // Limit cursor to relative movement inside the window
 
     player.setID("Player");
+
+    player.setupWeapon();
+
 
     SetTargetFPS(60);       // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -272,12 +275,12 @@ int main(void)
 
 
 
-        if (IsKeyPressed(KEY_ENTER)) //Input handling
+        if (IsKeyPressed(KEY_ENTER)) // -> move this to updateInputs or Actor
         {
 
-            if (player.ammoList.at(ammoIndex).state == BulletState::idle)
+            if (player.weapon.ammoList.at(ammoIndex).state == BulletState::idle)
             {
-                player.ammoList.at(ammoIndex).state = BulletState::fired;
+                player.weapon.ammoList.at(ammoIndex).state = BulletState::fired;
                 ammoIndex++;
 
             }
@@ -291,7 +294,7 @@ int main(void)
 
  
 
-
+        //Do this in a game function for scalability 
         player.lean.x = Lerp(player.lean.x, sideway * 0.02f, 10.0f * delta);
         player.lean.y = Lerp(player.lean.y, forward * 0.015f, 10.0f * delta);
     
@@ -303,6 +306,7 @@ int main(void)
 
         // Draw
         //----------------------------------------------------------------------------------
+        // -> Could make this section two functions
         BeginDrawing();
 
         ClearBackground(RAYWHITE);
@@ -315,7 +319,7 @@ int main(void)
         DrawSphere(player.weapon.position, 0.15f, RED); //weapon draw -> player.h
         DrawCubeV(t1.position, t1.size, BLUE); //target draw -> 
 
-        for (auto& bullet : player.ammoList) // ->Game.h
+        for (auto& bullet : player.weapon.ammoList) // ->Game.h
         {
             if (bullet.state == BulletState::travel)
             {
@@ -342,6 +346,13 @@ int main(void)
         DrawRectangle(5, 5, 330, 100, Fade(SKYBLUE, 0.5f));
         DrawRectangleLines(5, 5, 330, 100, BLUE);
 
+        DrawRectangle(5, 475, 330, 100, Fade(SKYBLUE, 0.5f));
+        DrawRectangleLines(5, 475, 330, 100, BLUE);
+
+        DrawCircle(650, 100, 90, Fade(PURPLE, 0.5f));
+        DrawCircleLines(650, 100, 90, Fade(PURPLE, 0.5f));
+
+        //Top box
         DrawText("Camera controls:", 15, 15, 10, BLACK);
         DrawText("- Move keys: W, A, S, D, Space, Left-Ctrl", 15, 30, 10, BLACK);
         DrawText("- Look around: arrow keys or mouse", 15, 45, 10, BLACK);
@@ -358,8 +369,15 @@ int main(void)
         }
 
 
-        std::cout << player.ammoList.at(0).state << "\n";
-       
+        //AmmoBox
+        DrawText("Weapon: Rocket Launcher",5,475,20,BLACK);
+        DrawText("/4", 20, 500, 20, BLACK);
+        player.weapon.notifyIdle();
+        DrawText(player.weapon.numBullets.c_str(), 10, 500, 20, BLACK);
+
+
+
+       // std::cout << player.weapon.ammoList.at(0).state << "\n";
         
   
         EndDrawing();
