@@ -54,3 +54,9 @@ void Actor::setupWeapon()
     }
 
 }
+
+
+void Actor::addWeapons()
+{
+    inventory.push_back(weapon);
+}

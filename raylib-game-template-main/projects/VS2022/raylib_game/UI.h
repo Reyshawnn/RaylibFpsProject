@@ -1,11 +1,15 @@
 #pragma once
 #include "raylib.h"
+#include "string"
+#include "raymath.h"
+
 class UI
 {
 public:
-	void drawAmmoUI(const Vector2 data) const;
-	void drawMapUI(const Vector2 data) const;
-	void drawExtraHudUI(const Vector2 data) const;
+	void drawAmmoUI(std::string& string) const;
+	void drawMapUI() const;
+	void drawExtraHudUI(Vector3 velData, std::string& hitString) const;
+	
 
 };
 

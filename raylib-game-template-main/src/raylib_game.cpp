@@ -27,6 +27,8 @@
 
 #include "Game.h"
 
+#include "UI.h"
+
 
 /*
 
@@ -34,7 +36,7 @@ TODO LIST -
 
 Start on the UI class 
 
-Command design pattern implementation 
+Command design pattern implementation      
 
 A 2nd weapon (Maybe draw a blue cube) and give it a ray collision implementation (like a automatic weapon) 
 
@@ -79,6 +81,7 @@ static Physics PhysicsEngine{};
 static Collision CollisionEngine{};
 static std::vector<Actor*> actors{ playerPtr };
 static Game game{};
+static UI ui{};
 
 //Map
 static const Vector3 towerSize = Vector3{ 16.0f, 32.0f, 16.0f };
@@ -232,13 +235,15 @@ int main(void)
         player.weapon.ammoList.at(i).bulletID = static_cast<int>(i);
     }
 
-
+  
 
     DisableCursor();        // Limit cursor to relative movement inside the window
 
     player.setID("Player");
 
     player.setupWeapon();
+
+    player.addWeapons();
 
 
     SetTargetFPS(60);       // Set our game to run at 60 frames-per-second
@@ -286,7 +291,7 @@ int main(void)
             }
 
             if (ammoIndex > 3)
-            {
+            { 
                 ammoIndex = 0;
             }
 
@@ -343,41 +348,46 @@ int main(void)
         EndMode3D();
 
         // Draw info box -- UI
-        DrawRectangle(5, 5, 330, 100, Fade(SKYBLUE, 0.5f));
-        DrawRectangleLines(5, 5, 330, 100, BLUE);
+        
+        player.weapon.notifyIdle();
+        ui.drawAmmoUI(player.weapon.numBullets);
+        
 
-        DrawRectangle(5, 475, 330, 100, Fade(SKYBLUE, 0.5f));
-        DrawRectangleLines(5, 475, 330, 100, BLUE);
 
-        DrawCircle(650, 100, 90, Fade(PURPLE, 0.5f));
-        DrawCircleLines(650, 100, 90, Fade(PURPLE, 0.5f));
+        /*DrawRectangle(5, 475, 330, 100, Fade(SKYBLUE, 0.5f));
+        DrawRectangleLines(5, 475, 330, 100, BLUE);*/
+
+        ui.drawExtraHudUI(player.velocity, hitString);
+
+
+        ui.drawMapUI();
 
         //Top box
-        DrawText("Camera controls:", 15, 15, 10, BLACK);
-        DrawText("- Move keys: W, A, S, D, Space, Left-Ctrl", 15, 30, 10, BLACK);
-        DrawText("- Look around: arrow keys or mouse", 15, 45, 10, BLACK);
-        DrawText(TextFormat("- Velocity Len: (%06.3f)", Vector2Length(Vector2{ player.velocity.x, player.velocity.z })), 15, 60, 10, BLACK);
-        DrawText("Last Target Hit: ", 15, 75, 10, BLACK);
-        if (hitString.empty())
-        {
-            DrawText("N/A", 100, 75, 10, BLACK);
-        }
-        else
-        {
-        
-            DrawText(hitString.c_str(), 100, 75, 10, BLACK);
-        }
+        //DrawText("Camera controls:", 15, 15, 10, BLACK);
+        //DrawText("- Move keys: W, A, S, D, Space, Left-Ctrl", 15, 30, 10, BLACK);
+        //DrawText("- Look around: arrow keys or mouse", 15, 45, 10, BLACK);
+        //DrawText(TextFormat("- Velocity Len: (%06.3f)", Vector2Length(Vector2{ player.velocity.x, player.velocity.z })), 15, 60, 10, BLACK);
+        //DrawText("Last Target Hit: ", 15, 75, 10, BLACK);
+        //if (hitString.empty())
+        //{
+        //    DrawText("N/A", 100, 75, 10, BLACK);
+        //}
+        //else
+        //{
+        //
+        //    DrawText(hitString.c_str(), 100, 75, 10, BLACK);
+        //}
 
 
-        //AmmoBox
-        DrawText("Weapon: Rocket Launcher",5,475,20,BLACK);
-        DrawText("/4", 20, 500, 20, BLACK);
-        player.weapon.notifyIdle();
-        DrawText(player.weapon.numBullets.c_str(), 10, 500, 20, BLACK);
+        ////AmmoBox
+        //DrawText("Weapon: Rocket Launcher",5,475,20,BLACK);
+        //DrawText("/4", 20, 500, 20, BLACK);
+        //player.weapon.notifyIdle();
+        //DrawText(player.weapon.numBullets.c_str(), 10, 500, 20, BLACK);
 
 
 
-       // std::cout << player.weapon.ammoList.at(0).state << "\n";
+        std::cout << player.weapon.ammoList.at(0).state << "\n";
         
   
         EndDrawing();

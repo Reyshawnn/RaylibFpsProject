@@ -35,6 +35,8 @@ struct Actor
     Input input;
     
     Weapon weapon; //object for drawing weapon in player model space
+    std::vector<Weapon> inventory;
+
 
     Camera camera;
 
@@ -45,6 +47,7 @@ struct Actor
     void bulletHandle(int index);
     void setID(std::string_view name);
     void setupWeapon();
+    void addWeapons();
     
 };
 
