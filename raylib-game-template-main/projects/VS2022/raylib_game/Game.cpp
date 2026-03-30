@@ -166,3 +166,38 @@ void Game::UpdateCollision(std::vector<Actor*>& actors, std::vector<Vector3>& lo
         }
     }
 }
+
+void Game::drawWeapon(std::vector<Actor*>& actors)
+{
+    for (auto& actor : actors)
+    {
+        switch (actor->weapon.info.shape)
+        {
+        case weaponShape::square:
+            DrawCubeV(actor->weapon.position, actor->weapon.info.vecSize, actor->weapon.info.color);
+            break;
+        case weaponShape::sphere:
+            DrawSphere(actor->weapon.position, actor->weapon.info.radiSize, actor->weapon.info.color);
+            break;
+        /*case weaponShape::triangle:
+            DrawTria*/
+        }
+    }
+}
+
+
+void Game::updateBullet(std::vector<Actor*>& actors)
+{
+    for (auto& actor : actors)
+    {
+        for (auto& bullet : actor->weapon.ammoList) // ->Game.h
+        {
+            if (bullet.state == BulletState::travel)
+            {
+                DrawSphere(bullet.position, 1.0f, RED);
+
+            }
+        }
+    }
+   
+}

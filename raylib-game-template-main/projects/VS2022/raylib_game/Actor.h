@@ -34,8 +34,8 @@ struct Actor
     
     Input input;
     
-    Weapon weapon; //object for drawing weapon in player model space
-    std::vector<Weapon> inventory;
+    Launcher weapon; //object for drawing weapon in player model space
+    std::vector<Launcher> inventory; 
 
 
     Camera camera;

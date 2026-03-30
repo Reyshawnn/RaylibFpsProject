@@ -4,6 +4,7 @@
 #include "Actor.h"
 #include "Physics.h"
 #include "Collision.h"
+#include "Bullet.h"
 #include <vector>
 
 class Game
@@ -16,6 +17,8 @@ public:
 	void UpdateInputs(std::vector<Actor*>& actors,float yaw, char side, char forward, bool jumpPressed, bool crouchHold, float dt);
 	void UpdatePhysandColl(std::vector<Actor*>& actors,Physics& PhysicsEngine,Collision& CollisionEngine,std::vector<Structure>& towers,float dt);
 	void UpdateCollision(std::vector<Actor*>& actors,std::vector<Vector3>& locations ,std::vector<Structure>& towers,Collision& CollisionEngine, Target& t1);
+	void drawWeapon(std::vector<Actor*>& actors);
+	void updateBullet(std::vector<Actor*>& actors);
 
 
 private:

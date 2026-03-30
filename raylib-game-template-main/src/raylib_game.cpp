@@ -46,6 +46,8 @@ Put the draw level class into Game
 
 Research making my own map files 
 
+Create the AOE effect of the rocket launcher 
+
 
 */
 
@@ -76,7 +78,6 @@ static Actor player = { 0 };
 static Actor* playerPtr{ &player };
 static Vector2 lookRotation = { 0 };
 static Vector2 lean = { 0 };
-static Weapon weapon{};
 static Physics PhysicsEngine{};
 static Collision CollisionEngine{};
 static std::vector<Actor*> actors{ playerPtr };
@@ -283,17 +284,7 @@ int main(void)
         if (IsKeyPressed(KEY_ENTER)) // -> move this to updateInputs or Actor
         {
 
-            if (player.weapon.ammoList.at(ammoIndex).state == BulletState::idle)
-            {
-                player.weapon.ammoList.at(ammoIndex).state = BulletState::fired;
-                ammoIndex++;
-
-            }
-
-            if (ammoIndex > 3)
-            { 
-                ammoIndex = 0;
-            }
+            player.weapon.fire();
 
         }
 
@@ -319,19 +310,12 @@ int main(void)
         BeginMode3D(player.camera);
 
 
-        DrawLevel();
+        DrawLevel(); //-> Game.h
 
-        DrawSphere(player.weapon.position, 0.15f, RED); //weapon draw -> player.h
-        DrawCubeV(t1.position, t1.size, BLUE); //target draw -> 
+        game.drawWeapon(actors);
+        DrawCubeV(t1.position, t1.size, BLUE); //target draw -> Game.h
 
-        for (auto& bullet : player.weapon.ammoList) // ->Game.h
-        {
-            if (bullet.state == BulletState::travel)
-            {
-                DrawSphere(bullet.position, 1.0f, RED);
-                
-            }
-        }
+        game.updateBullet(actors);
 
 
 

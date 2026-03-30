@@ -41,6 +41,31 @@ void Bullet::reset()
 
 }
 
+void Launcher::fire() 
+{
+    if (ammoList.at(currentBullet).state == BulletState::idle)
+    {
+        ammoList.at(currentBullet).state = BulletState::fired;
+        currentBullet++;
+
+    }
+
+    if (currentBullet > maxBullets)
+    {
+        currentBullet = 0;
+    }
+}
+
+void AutomaticWeapon::fire()
+{
+
+}
+
+void AutomaticWeapon::notifyIdle()
+{
+
+}
+
 std::ostream& operator<<(std::ostream& out, BulletState state)
 {
     switch (state)
