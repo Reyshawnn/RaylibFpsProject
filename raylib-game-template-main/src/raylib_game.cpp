@@ -53,6 +53,12 @@ Create the AOE effect of the rocket launcher
 create conversion function from weaponType to std::string for UI system
 
 how does weapon.dir get its dir again?
+
+update weapon ui for new gun 
+
+make it more automatic type 
+
+ clean up existing bullets when switching!
 */
 
 struct Tower
