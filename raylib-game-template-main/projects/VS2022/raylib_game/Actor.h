@@ -34,9 +34,10 @@ struct Actor
     
     Input input;
     
-    Launcher weapon; //object for drawing weapon in player model space
-    std::vector<Launcher> inventory; 
-
+    Launcher rocket; //object for drawing weapon in player model space
+    AutomaticWeapon gun;
+    //std::vector<Weapon*> inventory; 
+    Weapon* currentWeapon;
 
     Camera camera;
 
@@ -48,6 +49,8 @@ struct Actor
     void setID(std::string_view name);
     void setupWeapon();
     void addWeapons();
+    void switchWeapons();
+
     
 };
 

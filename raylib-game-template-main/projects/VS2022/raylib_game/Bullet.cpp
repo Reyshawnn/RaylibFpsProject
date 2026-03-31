@@ -50,7 +50,7 @@ void Launcher::fire()
 
     }
 
-    if (currentBullet > maxBullets)
+    if (currentBullet > maxBullets - 1)
     {
         currentBullet = 0;
     }
@@ -58,7 +58,7 @@ void Launcher::fire()
 
 void AutomaticWeapon::fire()
 {
-
+    rayReady = true;
 }
 
 void AutomaticWeapon::notifyIdle()
@@ -87,4 +87,10 @@ std::ostream& operator<<(std::ostream& out, BulletState state)
         return out;
 
     }
+}
+
+void Launcher::setMaxBullets(int max)
+{
+    maxBullets = max;
+    maxBulletsStr = static_cast<char>(max + 48);
 }

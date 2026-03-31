@@ -25,6 +25,13 @@ enum class weaponShape
 };
 
 
+enum class weaponType
+{
+    automatic,
+    launcher,
+};
+
+
 struct Bullet
 {
     Vector3 position{};
@@ -62,30 +69,40 @@ struct weaponInfo //Class for weapon info (name,firing style,texture,sound) etc
 
 struct tempWeapInfo //Throwaway class for sizes and color of weapon shapes
 {
-    Color color{ RED };
-    float radiSize{ 15.0f };
-    Vector3 vecSize{};
-    weaponShape shape{weaponShape::sphere};
+    weaponShape shape{ weaponShape::sphere };
+    weaponType type{};
+    Color color{};
+    float radiSize{ 0.15f };
+    Vector3 vecSize{ 0.15f ,0.15f ,0.15f };
+    
 };
 
 struct Weapon //maybe make this not a abstract base class to have a vector of weapons
 {
-    Vector3 position;
-    Vector3 dir;
-    tempWeapInfo info;
+    Vector3 position{};
+    Vector3 dir{};
+    tempWeapInfo info{};
+    Weapon(weaponShape s,weaponType t,Color c)
+        :info{ s,t,c }
+    {
+
+    }
     virtual void fire() = 0;
     virtual void notifyIdle() = 0;
 };
 
 struct Launcher : public Weapon
 {
-    std::vector<Bullet> ammoList;
-    std::string numBullets{};
-    int currentBullet;
-    int maxBullets;
     
-    void fire() override;
+public:
+    Launcher()
+        :Weapon(weaponShape::sphere,weaponType::launcher,RED)
+    {
+        
+    }
 
+    void fire() override;
+    void setMaxBullets(int max);
     void notifyIdle() override //-> notify UI system of ammo count
     {
         int counter{};
@@ -98,19 +115,34 @@ struct Launcher : public Weapon
         }
 
 
-        numBullets = static_cast<char>(counter + 48);
+        currentBulletsStr = static_cast<char>(counter + 48);
     }
+//private -> make getter functions
+    std::vector<Bullet> ammoList;
+    std::string currentBulletsStr{};
+    std::string maxBulletsStr{};
+    int currentBullet{};
+    int maxBullets{};
+
+    
 };
 
 
 struct AutomaticWeapon : public Weapon
 {
-    Ray ray;
-    RayCollision rayInfo;
+public:
+    AutomaticWeapon()
+        :Weapon(weaponShape::square,weaponType::automatic,BLUE)
+    {
+
+    }
     void fire() override;
     void notifyIdle() override;
 
-
+//private
+    Ray ray;
+    RayCollision rayInfo;
+    bool rayReady;
 };
 
 

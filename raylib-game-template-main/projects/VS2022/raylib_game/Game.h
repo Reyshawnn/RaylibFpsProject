@@ -19,6 +19,8 @@ public:
 	void UpdateCollision(std::vector<Actor*>& actors,std::vector<Vector3>& locations ,std::vector<Structure>& towers,Collision& CollisionEngine, Target& t1);
 	void drawWeapon(std::vector<Actor*>& actors);
 	void updateBullet(std::vector<Actor*>& actors);
+	void drawRay(std::vector<Actor*>& actors);
+
 
 
 private:

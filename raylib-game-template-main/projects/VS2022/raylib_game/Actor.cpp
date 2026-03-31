@@ -2,41 +2,41 @@
 
 void Actor::bulletHandle(int index)
 {
-    if (weapon.ammoList.at(index).state == BulletState::idle)
+    if (rocket.ammoList.at(index).state == BulletState::idle)
     {
 
         return;
     }
-    else if (weapon.ammoList.at(index).state == BulletState::fired)
+    else if (rocket.ammoList.at(index).state == BulletState::fired)
     {
-        weapon.ammoList.at(index).dir = weapon.dir;
-        weapon.ammoList.at(index).position = weapon.position;
-        weapon.ammoList.at(index).state = BulletState::travel;
+        rocket.ammoList.at(index).dir = rocket.dir;
+        rocket.ammoList.at(index).position = rocket.position;
+        rocket.ammoList.at(index).state = BulletState::travel;
     }
-    else if (weapon.ammoList.at(index).state == BulletState::travel)
+    else if (rocket.ammoList.at(index).state == BulletState::travel)
     {
-        if (weapon.ammoList.at(index).position.x >= 50.0f || weapon.ammoList.at(index).position.x <= -50.0f)
+        if (rocket.ammoList.at(index).position.x >= 50.0f || rocket.ammoList.at(index).position.x <= -50.0f)
         {
-            weapon.ammoList.at(index).reset();
+            rocket.ammoList.at(index).reset();
             
         }
-        else if (weapon.ammoList.at(index).position.y >= 50.0f || weapon.ammoList.at(index).position.y <= 0.0f)
+        else if (rocket.ammoList.at(index).position.y >= 50.0f || rocket.ammoList.at(index).position.y <= 0.0f)
         {
 
-            weapon.ammoList.at(index).reset();
+            rocket.ammoList.at(index).reset();
         }
 
-        else if (weapon.ammoList.at(index).position.z >= 50.0f || weapon.ammoList.at(index).position.z <= -50.0f)
+        else if (rocket.ammoList.at(index).position.z >= 50.0f || rocket.ammoList.at(index).position.z <= -50.0f)
         {
 
-            weapon.ammoList.at(index).reset();
+            rocket.ammoList.at(index).reset();
         }
 
     }
-    else if (weapon.ammoList.at(index).state == BulletState::hit)
+    else if (rocket.ammoList.at(index).state == BulletState::hit)
     {
         //something cool here maybe animation or something 
-        weapon.ammoList.at(index).state = BulletState::idle;
+        rocket.ammoList.at(index).state = BulletState::idle;
     }
 
 }
@@ -48,9 +48,9 @@ void Actor::setID(std::string_view name)
 
 void Actor::setupWeapon()
 {
-    for (int i{}; i < 4; i++)
+    for (int i{}; i < rocket.maxBullets; i++)
     {
-        weapon.ammoList.push_back(Bullet{});
+        rocket.ammoList.push_back(Bullet{});
     }
 
 }
@@ -58,5 +58,20 @@ void Actor::setupWeapon()
 
 void Actor::addWeapons()
 {
-    inventory.push_back(weapon);
+    //inventory.push_back(&weapon)
+    currentWeapon = &rocket;
+}
+
+
+void Actor::switchWeapons()
+{
+    if (currentWeapon->info.type == weaponType::launcher)
+    {
+        currentWeapon = &gun;
+    }
+    else if (currentWeapon->info.type == weaponType::automatic)
+    {
+        currentWeapon = &rocket;
+    }
+        
 }

@@ -29,6 +29,8 @@
 
 #include "UI.h"
 
+#include "Debug.h"
+
 
 /*
 
@@ -48,7 +50,9 @@ Research making my own map files
 
 Create the AOE effect of the rocket launcher 
 
+create conversion function from weaponType to std::string for UI system
 
+how does weapon.dir get its dir again?
 */
 
 struct Tower
@@ -231,9 +235,9 @@ int main(void)
     };
 
 
-    for (size_t i{}; i < player.weapon.ammoList.size(); i++)
+    for (size_t i{}; i < player.rocket.ammoList.size(); i++)
     {
-        player.weapon.ammoList.at(i).bulletID = static_cast<int>(i);
+        player.rocket.ammoList.at(i).bulletID = static_cast<int>(i);
     }
 
   
@@ -241,10 +245,13 @@ int main(void)
     DisableCursor();        // Limit cursor to relative movement inside the window
 
     player.setID("Player");
+    player.rocket.setMaxBullets(7);
 
     player.setupWeapon();
 
     player.addWeapons();
+
+   
 
 
     SetTargetFPS(60);       // Set our game to run at 60 frames-per-second
@@ -255,7 +262,7 @@ int main(void)
     {
         // Update -- Multiple things are being updated Player Inputs, New position calculations,etc
         //----------------------------------------------------------------------------------
-        Vector2 mouseDelta = GetMouseDelta();
+        Vector2 mouseDelta = GetMouseDelta(); //->Maybe bundle this in input object
         float delta = GetFrameTime();
         player.lookRotation.x -= mouseDelta.x * sensitivity.x;
         player.lookRotation.y += mouseDelta.y * sensitivity.y;
@@ -270,8 +277,19 @@ int main(void)
         bool crouching = IsKeyDown(KEY_LEFT_CONTROL);
         
 
+        if (IsKeyPressed(KEY_ENTER)) // -> maybe put this in a inputs.cpp function
+        {
 
+            player.currentWeapon->fire();
+
+        }
+
+        if (IsKeyPressed(KEY_P))
+        {
+            player.switchWeapons();
+        }
          
+
         game.UpdateInputs(actors,player.lookRotation.x, sideway, forward, IsKeyPressed(KEY_SPACE), crouching, delta);
         game.UpdatePhysandColl(actors, PhysicsEngine, CollisionEngine, towers, delta);
         game.UpdateCollision(actors, targetLocations, towers, CollisionEngine, t1);
@@ -281,12 +299,6 @@ int main(void)
 
 
 
-        if (IsKeyPressed(KEY_ENTER)) // -> move this to updateInputs or Actor
-        {
-
-            player.weapon.fire();
-
-        }
 
  
 
@@ -313,6 +325,8 @@ int main(void)
         DrawLevel(); //-> Game.h
 
         game.drawWeapon(actors);
+        //DrawSphere(player.rocket.position, player.rocket.info.radiSize, player.rocket.info.color);
+
         DrawCubeV(t1.position, t1.size, BLUE); //target draw -> Game.h
 
         game.updateBullet(actors);
@@ -333,8 +347,8 @@ int main(void)
 
         // Draw info box -- UI
         
-        player.weapon.notifyIdle();
-        ui.drawAmmoUI(player.weapon.numBullets);
+        player.rocket.notifyIdle();
+        ui.drawAmmoUI(player.rocket.currentBulletsStr, player.rocket.maxBulletsStr);
         
 
 
@@ -366,12 +380,13 @@ int main(void)
         ////AmmoBox
         //DrawText("Weapon: Rocket Launcher",5,475,20,BLACK);
         //DrawText("/4", 20, 500, 20, BLACK);
-        //player.weapon.notifyIdle();
-        //DrawText(player.weapon.numBullets.c_str(), 10, 500, 20, BLACK);
+        //player.rocket.notifyIdle();
+        //DrawText(player.rocket.numBullets.c_str(), 10, 500, 20, BLACK);
 
 
 
-        std::cout << player.weapon.ammoList.at(0).state << "\n";
+        std::cout << player.currentWeapon->info.color << "\n";
+
         
   
         EndDrawing();

@@ -39,12 +39,15 @@ void Game::AttachWeaponToCamera(Actor* actor)
     // --------------------------------------------------
     // 3. Final weapon position
     // --------------------------------------------------
-    actor->weapon.position = Vector3Add(actor->camera.position, worldOffset);
+    actor->rocket.position = Vector3Add(actor->camera.position, worldOffset);
+    actor->gun.ray.position = actor->rocket.position;
 
     // --------------------------------------------------
     // 4. Weapon forward direction (for shooting)
     // --------------------------------------------------
-    actor->weapon.dir = forward;
+    actor->rocket.dir = forward;
+    actor->gun.ray.direction = forward;
+
 }
 
 void Game::cameraSetup(Actor* actor)
@@ -159,10 +162,10 @@ void Game::UpdateCollision(std::vector<Actor*>& actors, std::vector<Vector3>& lo
     {
         CollisionEngine.bulletCheck(t1, actor, locations);
         CollisionEngine.bulletWallCheck(actor, towers);
-        for (int i{}; i < actor->weapon.ammoList.size(); i++)
+        for (int i{}; i < actor->rocket.ammoList.size(); i++)
         {
             actor->bulletHandle(i);
-            actor->weapon.ammoList.at(i).updateBullet();
+            actor->rocket.ammoList.at(i).updateBullet();
         }
     }
 }
@@ -171,13 +174,13 @@ void Game::drawWeapon(std::vector<Actor*>& actors)
 {
     for (auto& actor : actors)
     {
-        switch (actor->weapon.info.shape)
+        switch (actor->currentWeapon->info.shape)
         {
         case weaponShape::square:
-            DrawCubeV(actor->weapon.position, actor->weapon.info.vecSize, actor->weapon.info.color);
+            DrawCubeV(actor->rocket.position, actor->rocket.info.vecSize, actor->currentWeapon->info.color);
             break;
         case weaponShape::sphere:
-            DrawSphere(actor->weapon.position, actor->weapon.info.radiSize, actor->weapon.info.color);
+            DrawSphere(actor->rocket.position, actor->rocket.info.radiSize, actor->currentWeapon->info.color);
             break;
         /*case weaponShape::triangle:
             DrawTria*/
@@ -190,14 +193,26 @@ void Game::updateBullet(std::vector<Actor*>& actors)
 {
     for (auto& actor : actors)
     {
-        for (auto& bullet : actor->weapon.ammoList) // ->Game.h
+        if(actor->currentWeapon->info.type==weaponType::launcher)
         {
-            if (bullet.state == BulletState::travel)
+            for (auto& bullet : actor->rocket.ammoList) // ->Game.h
             {
-                DrawSphere(bullet.position, 1.0f, RED);
+                if (bullet.state == BulletState::travel)
+                {
+                    DrawSphere(bullet.position, 1.0f, RED);
 
+                }
+            }
+        }
+        else if (actor->currentWeapon->info.type == weaponType::automatic)
+        {
+            if (actor->gun.rayReady)
+            {
+                DrawRay(actor->gun.ray, RED);
+                
             }
         }
     }
    
 }
+
