@@ -281,6 +281,8 @@ int main(void)
         char sideway = (IsKeyDown(KEY_D) - IsKeyDown(KEY_A));
         char forward = (IsKeyDown(KEY_W) - IsKeyDown(KEY_S));
         bool crouching = IsKeyDown(KEY_LEFT_CONTROL);
+
+        
         
 
         if (IsKeyPressed(KEY_ENTER)) // -> maybe put this in a inputs.cpp function
@@ -300,8 +302,10 @@ int main(void)
         game.UpdatePhysandColl(actors, PhysicsEngine, CollisionEngine, towers, delta);
         game.UpdateCollision(actors, targetLocations, towers, CollisionEngine, t1);
         game.UpdateCamera(&player, delta);
+        
+        
 
-
+       
 
 
 
@@ -354,7 +358,7 @@ int main(void)
         // Draw info box -- UI
         
         player.rocket.notifyIdle();
-        ui.drawAmmoUI(player.rocket.currentBulletsStr, player.rocket.maxBulletsStr);
+        ui.drawAmmoUI(player.rocket.currentBulletsStr, player.rocket.maxBulletsStr,player.currentWeapon->name);
         
 
 
@@ -393,7 +397,7 @@ int main(void)
 
         std::cout << player.currentWeapon->info.color << "\n";
 
-        
+        player.gun.reset();
   
         EndDrawing();
 

@@ -31,7 +31,11 @@ enum class weaponType
     launcher,
 };
 
-
+enum class rayState
+{
+    ready,
+    fire,
+};
 struct Bullet
 {
     Vector3 position{};
@@ -82,8 +86,10 @@ struct Weapon //maybe make this not a abstract base class to have a vector of we
     Vector3 position{};
     Vector3 dir{};
     tempWeapInfo info{};
-    Weapon(weaponShape s,weaponType t,Color c)
-        :info{ s,t,c }
+    std::string name{};
+    Weapon(weaponShape s, weaponType t, Color c, std::string n)
+        :info{ s,t,c },
+         name{ n }
     {
 
     }
@@ -96,7 +102,7 @@ struct Launcher : public Weapon
     
 public:
     Launcher()
-        :Weapon(weaponShape::sphere,weaponType::launcher,RED)
+        :Weapon(weaponShape::sphere,weaponType::launcher,RED, "Weapon: Rocket Launcher")
     {
         
     }
@@ -123,6 +129,7 @@ public:
     std::string maxBulletsStr{};
     int currentBullet{};
     int maxBullets{};
+    
 
     
 };
@@ -132,17 +139,17 @@ struct AutomaticWeapon : public Weapon
 {
 public:
     AutomaticWeapon()
-        :Weapon(weaponShape::square,weaponType::automatic,BLUE)
+        :Weapon(weaponShape::square,weaponType::automatic,BLUE, "Weapon: Semi Auto Rifle")
     {
 
     }
     void fire() override;
     void notifyIdle() override;
+    void reset();
 
 //private
     Ray ray;
-    RayCollision rayInfo;
-    bool rayReady;
+    rayState state{};
 };
 
 

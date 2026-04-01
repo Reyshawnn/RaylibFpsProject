@@ -21,5 +21,6 @@ public:
 private:
 	float nextX;
 	float nextZ;
+	RayCollision rayinfo;
 };
 

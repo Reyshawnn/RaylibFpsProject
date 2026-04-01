@@ -58,12 +58,17 @@ void Launcher::fire()
 
 void AutomaticWeapon::fire()
 {
-    rayReady = true;
+    state = rayState::fire;
 }
 
 void AutomaticWeapon::notifyIdle()
 {
 
+}
+
+void AutomaticWeapon::reset()
+{
+    state = rayState::ready;
 }
 
 std::ostream& operator<<(std::ostream& out, BulletState state)

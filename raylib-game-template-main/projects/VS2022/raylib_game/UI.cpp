@@ -1,10 +1,10 @@
 #include "UI.h"
 
-void UI::drawAmmoUI(std::string& string, std::string& string2) const
+void UI::drawAmmoUI(std::string& string, std::string& string2,std::string& string3) const
 {
     DrawRectangle(5, 475, 330, 100, Fade(SKYBLUE, 0.5f));
     DrawRectangleLines(5, 475, 330, 100, BLUE);
-    DrawText("Weapon: Rocket Launcher", 5, 475, 20, BLACK);
+    DrawText(string3.c_str(), 5, 475, 20, BLACK);
     DrawText(string.c_str(), 10, 500, 20, BLACK);
     DrawText(" / ", 15, 500, 20, BLACK);
     DrawText(string2.c_str(), 40, 500, 20, BLACK);

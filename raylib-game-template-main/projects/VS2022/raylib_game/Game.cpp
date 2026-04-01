@@ -193,8 +193,8 @@ void Game::updateBullet(std::vector<Actor*>& actors)
 {
     for (auto& actor : actors)
     {
-        if(actor->currentWeapon->info.type==weaponType::launcher)
-        {
+        //if(actor->currentWeapon->info.type==weaponType::launcher)
+       // {
             for (auto& bullet : actor->rocket.ammoList) // ->Game.h
             {
                 if (bullet.state == BulletState::travel)
@@ -203,15 +203,15 @@ void Game::updateBullet(std::vector<Actor*>& actors)
 
                 }
             }
-        }
-        else if (actor->currentWeapon->info.type == weaponType::automatic)
-        {
-            if (actor->gun.rayReady)
+       // }
+       // else if (actor->currentWeapon->info.type == weaponType::automatic)
+      //  {
+            if (actor->gun.state == rayState::fire)
             {
                 DrawRay(actor->gun.ray, RED);
                 
             }
-        }
+       // }
     }
    
 }

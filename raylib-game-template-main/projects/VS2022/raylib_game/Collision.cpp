@@ -146,10 +146,24 @@ void Collision::bulletCheck(Target& target, Actor* actor,std::vector<Vector3>& l
             int randNum{ GetRandomValue(0,3) };
             target.position = locations.at(randNum);
             target.updateTarget();
+            bullet.state = BulletState::hit;
            // Send request to UI system hitString = std::format("Bullet Number {}, hit target!", bullet.bulletID);
         }
 
     }
+
+    rayinfo = GetRayCollisionBox(actor->gun.ray, target.box);
+
+    if (rayinfo.hit && actor->gun.state == rayState::fire)
+    {
+        int randNum{ GetRandomValue(0,3) };
+        target.position = locations.at(randNum);
+        target.updateTarget();
+    }
+
+
+
+    
 }
 
 void Collision::bulletWallCheck(Actor* actor, std::vector<Structure>& walls)
