@@ -35,41 +35,28 @@
 /*
 
 TODO LIST - 
+ 
+     very soon - 
+     how does weapon.dir get its dir again?
+     Create the AOE effect of the rocket launcher
+     make it more automatic type
+     Rocket launcher and auto rifles need to act differently one held enter and one pressed enter
 
-Start on the UI class 
 
-Command design pattern implementation      
 
-A 2nd weapon (Maybe draw a blue cube) and give it a ray collision implementation (like a automatic weapon) 
 
-add basic sound / textures
+     near future-
+     Command design pattern implementation
 
-Put the draw level class into Game 
+    Future - 
+    add basic sound / textures
+    Put the draw level class into Game 
+    Research making my own map files 
+    create conversion function from weaponType to std::string for UI system
 
-Research making my own map files 
-
-Create the AOE effect of the rocket launcher 
-
-create conversion function from weaponType to std::string for UI system
-
-how does weapon.dir get its dir again?
-
-update weapon ui for new gun 
-
-make it more automatic type 
-
- clean up existing bullets when switching!
 */
 
-struct Tower
-{
-    Vector3 position;
-    Vector3 size;
-    Color color;
-    int id;
-    BoundingBox box;
 
-};
 
 
 
@@ -109,12 +96,7 @@ Structure{ { 48.5f, 8.15f, -5.0f },{ 2.0f, 17.0f, 105.0f }, GRAY},
 Structure{{ 1.25f, 8.15f, 48.5f },{ 108.0f, 17.0f, 2.0f },BLACK, 3},
 Structure{{ -55.25f, 8.15f, 1.25f },{ 5.0f, 17.0f, 110.5f },SKYBLUE, 4}};
 
-//Collision globals
-static bool hitTowerX{ false };
-static bool hitTowerZ{ false };
 
-static bool hitWallX{ false };
-static bool hitWallZ{ false };
 
 
 
@@ -180,7 +162,7 @@ int main(void)
     const int screenHeight = 600;
     int framecount{};
 
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - 3d camera fps");
+    InitWindow(screenWidth, screenHeight, "ReyshawnnFPS");
 
 
     game.cameraSetup(&player);
@@ -285,7 +267,7 @@ int main(void)
         
         
 
-        if (IsKeyPressed(KEY_ENTER)) // -> maybe put this in a inputs.cpp function
+        if (IsKeyPressed(KEY_ENTER)) // -> I need to check inputs based on weaponType
         {
 
             player.currentWeapon->fire();

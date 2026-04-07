@@ -14,7 +14,7 @@ std::ostream& operator<<(std::ostream& out, tempWeapInfo& info)
 
 std::ostream& operator<<(std::ostream& out, Color color)
 {
-	if ((color.r && color.g && color.b && color.a) == Color{RED}.r, Color{ RED }.g, Color{ RED }.b, Color{ RED }.a)
+	if (((color.r == Color{ RED }.r) && (color.g == Color{ RED }.g) && (color.b == Color{ RED }.b) && (color.a == Color{ RED }.a)))
 	{
 		out << "RED";
 	}
