@@ -41,6 +41,7 @@ TODO LIST -
      Create the AOE effect of the rocket launcher
      make it more automatic type
      Rocket launcher and auto rifles need to act differently one held enter and one pressed enter
+     add basic sound / textures
 
 
 
@@ -49,7 +50,6 @@ TODO LIST -
      Command design pattern implementation
 
     Future - 
-    add basic sound / textures
     Put the draw level class into Game 
     Research making my own map files 
     create conversion function from weaponType to std::string for UI system
@@ -141,6 +141,8 @@ static std::vector<Structure> walls{ wallOne,wallTwo,wallThree,wallFour };
 // Module Functions Declaration
 //----------------------------------------------------------------------------------
 static void DrawLevel(void); //Map
+Model mod{};
+
 
 
 
