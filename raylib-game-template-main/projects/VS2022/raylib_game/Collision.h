@@ -12,8 +12,10 @@ public:
     void collInit(Actor* actor,float dt); 
 	void collBuilding(Actor* actor, std::vector<Structure>&buildings);
 	void collUpdate(std::vector<Actor*>& actors, float dt);
-	void bulletCheck(Target& target, Actor* actor, std::vector<Vector3>& locations);
+	void bulletCheck(Target& target, Actor* actor, std::vector<Vector3>& locations,Actor& actor2);
 	void bulletWallCheck(Actor* actor, std::vector<Structure>& walls);
+	void collInitAI(Actor* actor, float dt);
+	void bulletCheckAI(Actor* actor);
 	float getNextX() const;
 	float getNextZ() const;
 

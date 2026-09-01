@@ -32,6 +32,8 @@
 #include "Debug.h"
 
 
+
+
 /*
 
 TODO LIST - 
@@ -42,6 +44,7 @@ TODO LIST -
      make it more automatic type
      Rocket launcher and auto rifles need to act differently one held enter and one pressed enter
      add basic sound / textures
+     make some complex shapes like ramps and stairs
 
 
 
@@ -73,11 +76,14 @@ static Vector2 sensitivity = { 0.001f, 0.001f };
 
 static Actor player = { 0 };
 static Actor* playerPtr{ &player };
+static Actor enemy{};
+static Actor* enemyPtr{ &enemy };
 static Vector2 lookRotation = { 0 };
 static Vector2 lean = { 0 };
 static Physics PhysicsEngine{};
 static Collision CollisionEngine{};
-static std::vector<Actor*> actors{ playerPtr };
+static std::vector<Actor*> actors{ playerPtr};
+static std::vector<Actor*> actorsA{ enemyPtr };
 static Game game{};
 static UI ui{};
 
@@ -100,8 +106,11 @@ Structure{{ -55.25f, 8.15f, 1.25f },{ 5.0f, 17.0f, 110.5f },SKYBLUE, 4}};
 
 
 
+
+//target cube
 static Target t1{};
 static std::vector<Vector3> targetLocations{ {10.0f,20.0f,5.0f},{20.0f,10.0f,20.0f}, {5.0f,0.0f,22.5f}, {0.0f,0.0f,0.0f} };
+
 static std::string hitString{};
 
 //Map -> make a .data file format (prob json)
@@ -140,8 +149,8 @@ static std::vector<Structure> walls{ wallOne,wallTwo,wallThree,wallFour };
 //----------------------------------------------------------------------------------
 // Module Functions Declaration
 //----------------------------------------------------------------------------------
-static void DrawLevel(void); //Map
 Model mod{};
+Map world{};
 
 
 
@@ -176,40 +185,52 @@ int main(void)
 
 
 
-    for (auto& t : towers) //setBoundingBox() function -> Map.h
+    //for (auto& t : towers) //setBoundingBox() function -> Map.h
+    //{
+    //    t.box.min = { t.position.x - t.size.x * 0.5f,
+    //    t.position.y - t.size.y * 0.5f,
+    //     t.position.z - t.size.z * 0.5f
+    //    };
+
+    //    t.box.max = { t.position.x + t.size.x * 0.5f,
+    //    t.position.y + t.size.y * 0.5f,
+    //    t.position.z + t.size.z * 0.5f
+    //    };
+    //}
+
+    //for (auto& w : walls)
+    //{
+    //    w.box.min = { w.position.x - w.size.x * 0.5f,
+    //           w.position.y - w.size.y * 0.5f,
+    //           w.position.z - w.size.z * 0.5f
+    //    };
+
+    //    w.box.max = { w.position.x + w.size.x * 0.5f,
+    //    w.position.y + w.size.y * 0.5f,
+    //    w.position.z + w.size.z * 0.5f
+    //    };
+
+
+    //}
+    std::string fileString{ "C:/Users/chido/OneDrive/Desktop/git fps/raylib-game-template-main/projects/VS2022/build/raylib_game/bin/x64/Debug/assets/textures/grass.jpg" };
+    world.setBuildings(towers);
+    world.setWalls(walls);
+   /* world.addTexture(fileString);
+    
+    for (auto& floor : world.tiles)
     {
-        t.box.min = { t.position.x - t.size.x * 0.5f,
-        t.position.y - t.size.y * 0.5f,
-         t.position.z - t.size.z * 0.5f
-        };
-
-        t.box.max = { t.position.x + t.size.x * 0.5f,
-        t.position.y + t.size.y * 0.5f,
-        t.position.z + t.size.z * 0.5f
-        };
-    }
-
-    for (auto& w : walls)
-    {
-        w.box.min = { w.position.x - w.size.x * 0.5f,
-               w.position.y - w.size.y * 0.5f,
-               w.position.z - w.size.z * 0.5f
-        };
-
-        w.box.max = { w.position.x + w.size.x * 0.5f,
-        w.position.y + w.size.y * 0.5f,
-        w.position.z + w.size.z * 0.5f
-        };
-
-
-    }
+        floor.setTexture(world.textures.at(0));
+    }*/
 
     size_t ammoIndex{};
 
     game.UpdateCameraFPS(&player);
+    game.setupTiles(world);
+    world.sortTiles();
 
 
 
+    //Put this in a function in Target
     t1.box.min =
     {
         t1.position.x - t1.size.x * 0.5f,
@@ -230,6 +251,7 @@ int main(void)
         player.rocket.ammoList.at(i).bulletID = static_cast<int>(i);
     }
 
+    enemy.position = { 0.0f,0.0f,-50.0f };
   
 
     DisableCursor();        // Limit cursor to relative movement inside the window
@@ -241,6 +263,18 @@ int main(void)
 
     player.addWeapons();
 
+
+    enemy.setID("enemy");
+    enemy.rocket.setMaxBullets(7);
+
+    enemy.setupWeapon();
+
+    enemy.addWeapons();
+
+    enemy.setSize(Vector3{ 5.0f,10.0f,5.0f });
+
+    player.enemies.push_back(enemy);
+    enemy.enemies.emplace_back(player);
    
 
 
@@ -269,8 +303,13 @@ int main(void)
         
         
 
-        if (IsKeyPressed(KEY_ENTER)) // -> I need to check inputs based on weaponType
+        if (IsKeyPressed(KEY_ENTER))
         {
+            /*
+            maybe have to check weapon type and handle resetting shoot state from there
+            so maybe IsKeyPressed && currentweapon = semi auto fire
+            and isKeyHeld && currentweapon = full auto etc
+            */
 
             player.currentWeapon->fire();
 
@@ -281,12 +320,19 @@ int main(void)
             player.switchWeapons();
         }
          
-
+      
+        //player version 
         game.UpdateInputs(actors,player.lookRotation.x, sideway, forward, IsKeyPressed(KEY_SPACE), crouching, delta);
-        game.UpdatePhysandColl(actors, PhysicsEngine, CollisionEngine, towers, delta);
-        game.UpdateCollision(actors, targetLocations, towers, CollisionEngine, t1);
+        game.UpdatePhysandColl(actors, PhysicsEngine, CollisionEngine, world.allStructures, delta);
+        game.UpdateCollision(actors, targetLocations, world.allStructures, CollisionEngine, t1);
         game.UpdateCamera(&player, delta);
         
+        //AI version
+        CollisionEngine.collInitAI(&enemy, delta);
+        CollisionEngine.bulletCheckAI(&player);
+
+
+       
         
 
        
@@ -316,16 +362,19 @@ int main(void)
         BeginMode3D(player.camera);
 
 
-        DrawLevel(); //-> Game.h
+       // DrawLevel(); //-> Game.h
+        game.drawMap(world);
 
         game.drawWeapon(actors);
         //DrawSphere(player.rocket.position, player.rocket.info.radiSize, player.rocket.info.color);
 
         DrawCubeV(t1.position, t1.size, BLUE); //target draw -> Game.h
+       
 
         game.updateBullet(actors);
-
-
+        game.drawEnemies(enemy);
+        DrawBoundingBox(enemy.boxX, YELLOW);
+       // DrawBoundingBox(enemy.boxZ, YELLOW);
 
 
 
@@ -379,12 +428,20 @@ int main(void)
 
 
 
-        std::cout << player.currentWeapon->info.color << "\n";
+        /*if (FileExists("C:/Users/chido/OneDrive/Desktop/git fps/raylib-game-template-main/projects/VS2022/build/raylib_game/bin/x64/Debug/assets/textures/grass.jpg"))
+        {
+            std::cout << "exists" << "\n";
+        }
+        else
+        {
+            std::cout << "nah" << "\n";
+        }*/
 
         player.gun.reset();
   
         EndDrawing();
-
+        
+        world.scanTile(player);
         //----------------------------------------------------------------------------------
     }
 
@@ -397,59 +454,7 @@ int main(void)
 }
 
 // Draw game level --> Game.h Will process data from Map Objects
-static void DrawLevel(void)
-{
-    const int floorExtent = 100;
-    const float tileSize = 5.0f;
-    const Color tileColor1 = Color{ 150, 200, 200, 255 };
 
-    //walls
-
-    for (auto& w : walls)
-    {
-        DrawCubeV(w.position, w.size, w.color);
-        DrawBoundingBox(w.box, YELLOW);
-    }
-
-    // Floor tiles
-    for (int y = -floorExtent; y < floorExtent; y++)
-    {
-        for (int x = -floorExtent; x < floorExtent; x++)
-        {
-            if ((y & 1) && (x & 1))
-            {
-                DrawPlane(Vector3{ x * tileSize, 0.0f, y * tileSize }, Vector2{ tileSize, tileSize }, tileColor1);
-            }
-            else if (!(y & 1) && !(x & 1))
-            {
-                DrawPlane(Vector3{ x * tileSize, 0.0f, y * tileSize }, Vector2{ tileSize, tileSize }, LIGHTGRAY);
-            }
-        }
-    }
-
-    const Vector3 towerSize = Vector3{ 16.0f, 32.0f, 16.0f };
-    const Color towerColor = Color{ 150, 200, 200, 255 };
-
-
-
-
-    for (auto& t : towers)
-    {
-        DrawCubeV(t.position, t.size, t.color);
-        //DrawCubeV(t.box.max, t.size, t.color);
-        DrawBoundingBox(t.box, BLACK);
-    }
-
-
-    /*for (auto& w : walls)
-    {
-        DrawLine3D(w.box.min, w.box.max, YELLOW);
-    }*/
-
-
-    // Red sun
-    DrawSphere(Vector3{ 300.0f, 300.0f, 0.0f }, 100.0f, Color{ 255, 0, 0, 255 });
-}
 
 
 

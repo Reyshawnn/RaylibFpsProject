@@ -30,6 +30,7 @@ struct Actor
     bool collideZ;
     BoundingBox boxX;
     BoundingBox boxZ;
+    Vector3 size;
 
     
     Input input;
@@ -44,12 +45,14 @@ struct Actor
     Vector2 lookRotation;
     Vector2 lean;
     std::string ID;
+    std::vector<Actor> enemies;
 
     void bulletHandle(int index);
     void setID(std::string_view name);
     void setupWeapon();
     void addWeapons();
     void switchWeapons();
+    void setSize(Vector3 size);
 
     
 };

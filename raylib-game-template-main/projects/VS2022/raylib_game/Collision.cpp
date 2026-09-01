@@ -20,14 +20,14 @@ void Collision::collInit(Actor* actor,float dt)
 
     actor->boxX.min =
     {
-        nextX - 0.5f,
+        nextX - 0.55f,
         actor->position.y,
         actor->position.z
     };
 
     actor->boxX.max =
     {
-        nextX + 0.5f,
+        nextX + 0.55f,
         actor->position.y,
         actor->position.z
     };
@@ -36,15 +36,67 @@ void Collision::collInit(Actor* actor,float dt)
     {
         actor->position.x,
         actor->position.y,
-        nextZ - 0.5f
+        nextZ - 0.55f
     };
 
     actor->boxZ.max =
     {
         actor->position.x,
         actor->position.y,
-        nextZ + 0.5f
+        nextZ + 0.55f
     };
+
+    actor->collideX = false;
+    actor->collideZ = false;
+}
+
+void Collision::collInitAI(Actor* actor, float dt)
+{
+    nextX = actor->position.x + actor->velocity.x * dt;
+    nextZ = actor->position.z + actor->velocity.z * dt;
+
+
+    actor->boxX.min =
+    {
+        nextX - actor->size.x * 0.55f,
+        actor->position.y - actor->size.y * 0.55f,
+        actor->position.z - actor->size.y * 0.55f
+    };
+
+    actor->boxX.max =
+    {
+        nextX + actor->size.y * 0.55f,
+        actor->position.y + actor->size.y * 0.55f,
+        actor->position.z + actor->size.y * 0.55f
+    };
+
+    actor->boxZ.min =
+    {
+        actor->position.x - actor->size.x * 0.55f,
+        actor->position.y - actor->size.y * 0.55f,
+        nextZ - actor->size.y * 0.55f
+    };
+
+    actor->boxZ.max =
+    {
+        actor->position.x - actor->size.x * 0.55f,
+        actor->position.y - actor->size.y * 0.55f,
+        nextZ - actor->size.y * 0.55f
+    };
+
+    /*actor->boxX.min =
+    {
+        actor->position.x - actor->size.x * 0.55f,
+        actor->position.y - actor->size.y * 0.55f,
+        actor->position.z - actor->size.z * 0.55f
+    };
+
+    actor->boxX.max =
+    {
+        actor->position.x + actor->size.x * 0.55f,
+        actor->position.y + actor->size.y * 0.55f,
+        actor->position.z + actor->size.z * 0.55f
+    };*/
 
     actor->collideX = false;
     actor->collideZ = false;
@@ -137,11 +189,11 @@ float Collision::getNextZ() const
 }
 
 
-void Collision::bulletCheck(Target& target, Actor* actor,std::vector<Vector3>& locations)
+void Collision::bulletCheck(Target& target, Actor* actor,std::vector<Vector3>& locations, Actor& actor2)
 {
     for (auto& bullet : actor->rocket.ammoList)
     {
-        if (CheckCollisionBoxes(bullet.box, target.box) && bullet.state != BulletState::idle)
+        if ((CheckCollisionBoxes(bullet.box, target.box) && bullet.state != BulletState::idle))
         {
             int randNum{ GetRandomValue(0,3) };
             target.position = locations.at(randNum);
@@ -149,6 +201,10 @@ void Collision::bulletCheck(Target& target, Actor* actor,std::vector<Vector3>& l
             bullet.state = BulletState::hit;
            // Send request to UI system hitString = std::format("Bullet Number {}, hit target!", bullet.bulletID);
         }
+
+       
+       
+
 
     }
 
@@ -162,10 +218,49 @@ void Collision::bulletCheck(Target& target, Actor* actor,std::vector<Vector3>& l
     }
 
 
+    rayinfo = GetRayCollisionBox(actor->gun.ray, actor2.boxX);
+
+    if (rayinfo.hit && actor->gun.state == rayState::fire)
+    {
+        std::cout << "hit enemy " << "\n";
+    }
+
+    rayinfo = GetRayCollisionBox(actor->gun.ray, actor2.boxZ);
+
+    if (rayinfo.hit && actor->gun.state == rayState::fire)
+    {
+        std::cout << "hit enemy " << "\n";
+    }
+
+
+
 
     
 }
 
+
+void Collision::bulletCheckAI(Actor* actor)
+{
+    for (auto& bullet : actor->rocket.ammoList)
+    {
+        
+        if ((CheckCollisionBoxes(bullet.box, actor->enemies.at(0).boxX) && bullet.state != BulletState::idle) || (CheckCollisionBoxes(bullet.box, actor->enemies.at(0).boxZ) && bullet.state != BulletState::idle))
+        {
+            std::cout << bullet.position.x << " " << bullet.position.z << "\n";
+            
+
+        }
+        std::cout << actor->enemies.at(0).boxX.max.x << "\n";
+
+    }
+
+    
+
+
+
+
+
+}
 void Collision::bulletWallCheck(Actor* actor, std::vector<Structure>& walls)
 {
     for (auto& bullet : actor->rocket.ammoList)

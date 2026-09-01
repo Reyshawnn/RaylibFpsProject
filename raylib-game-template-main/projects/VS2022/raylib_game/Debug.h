@@ -8,6 +8,8 @@ class Debug
 
 std::ostream& operator<<(std::ostream& out, Vector3 vec);
 std::ostream& operator<<(std::ostream& out, Color color);
+
+
 //
 //std::cout << player.dir.x << " " << player.dir.y << " " << player.dir.z << "\n";
 //std::cout << "Player Pos: " << player.position.x << " " << player.position.y << " " << player.position.z << "\n";

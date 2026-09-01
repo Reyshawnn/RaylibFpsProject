@@ -38,7 +38,7 @@ enum class rayState
 };
 struct Bullet
 {
-    Vector3 position{};
+    Vector3 position;
     Vector3 velocity{ 55.0f,55.0f,55.0f };
     Vector3 dir{};
     BulletState state{ BulletState::idle };
@@ -47,7 +47,7 @@ struct Bullet
     int bulletID{};
     void updateBullet();
     friend std::ostream& operator<<(std::ostream&, const Bullet& bullet);
-    void reset();
+    void reset(Vector3 pos);
 
 
 };

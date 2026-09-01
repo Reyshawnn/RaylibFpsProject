@@ -29,11 +29,11 @@ std::ostream& operator<<(std::ostream& out, const Bullet& bullet)
     return out;
 }
 
-void Bullet::reset()
+void Bullet::reset(Vector3 pos)
 {
-    position.x = 0.0f;
-    position.y = 0.0f;
-    position.z = 0.0f;
+    position.x = pos.x;
+    position.y = pos.y;
+    position.z = pos.z;
 
 
 

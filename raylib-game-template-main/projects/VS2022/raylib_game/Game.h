@@ -20,7 +20,11 @@ public:
 	void drawWeapon(std::vector<Actor*>& actors);
 	void updateBullet(std::vector<Actor*>& actors);
 	void drawRay(std::vector<Actor*>& actors);
-
+	void drawMap(Map& map);
+	void turnRED(Map& map);
+	void setupTiles(Map& map);
+	void drawEnemies(Actor& actor);
+	
 
 
 private:
@@ -29,6 +33,7 @@ private:
 	float headTimer{ 0.0f };
 	float walkLerp{ 0.0f };
 	float headLerp{ 1.0f};
+	int idcount{};
 
 };
 

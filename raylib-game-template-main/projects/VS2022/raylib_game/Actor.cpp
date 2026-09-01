@@ -17,19 +17,19 @@ void Actor::bulletHandle(int index)
     {
         if (rocket.ammoList.at(index).position.x >= 50.0f || rocket.ammoList.at(index).position.x <= -50.0f)
         {
-            rocket.ammoList.at(index).reset();
+            rocket.ammoList.at(index).reset(position);
             
         }
         else if (rocket.ammoList.at(index).position.y >= 50.0f || rocket.ammoList.at(index).position.y <= 0.0f)
         {
 
-            rocket.ammoList.at(index).reset();
+            rocket.ammoList.at(index).reset(position);
         }
 
         else if (rocket.ammoList.at(index).position.z >= 50.0f || rocket.ammoList.at(index).position.z <= -50.0f)
         {
 
-            rocket.ammoList.at(index).reset();
+            rocket.ammoList.at(index).reset(position);
         }
 
     }
@@ -74,4 +74,9 @@ void Actor::switchWeapons()
         currentWeapon = &rocket;
     }
         
+}
+
+void Actor::setSize(Vector3 size1)
+{
+    size = size1;
 }

@@ -124,15 +124,17 @@ void Game::UpdateInputs(std::vector<Actor*>& actors, float yaw, char side, char 
     for(auto& Actor: actors)
     {
 
-        Actor->input.setInputs(side, forward, jumpPressed);
-        Actor->jumpPressed = Actor->input.getJump();
         if (Actor->ID == "Player")
         {
+            Actor->input.setInputs(side, forward, jumpPressed);
+            Actor->jumpPressed = Actor->input.getJump();
             Actor->input.setDirection(yaw);
+            Actor->input.setFinalDirection(dt);
+            Actor->dir = Actor->input.getFinalDirection();
+            return;
         }
-        Actor->input.setFinalDirection(dt);
-        Actor->dir = Actor->input.getFinalDirection();
     }
+    
 }
 
 void Game::UpdatePhysandColl(std::vector<Actor*>& actors, Physics& PhysicsEngine, Collision& CollisionEngine, std::vector<Structure>& towers, float dt)
@@ -153,6 +155,7 @@ void Game::UpdatePhysandColl(std::vector<Actor*>& actors, Physics& PhysicsEngine
 
         PhysicsEngine.jumpCheck(Actor, dt);
         CollisionEngine.collUpdate(actors, dt);
+        return;
     }
 }
 
@@ -160,7 +163,7 @@ void Game::UpdateCollision(std::vector<Actor*>& actors, std::vector<Vector3>& lo
 {
     for (auto& actor : actors)
     {
-        CollisionEngine.bulletCheck(t1, actor, locations);
+        CollisionEngine.bulletCheck(t1, actor, locations,actor->enemies.at(0));
         CollisionEngine.bulletWallCheck(actor, towers);
         for (int i{}; i < actor->rocket.ammoList.size(); i++)
         {
@@ -216,3 +219,113 @@ void Game::updateBullet(std::vector<Actor*>& actors)
    
 }
 
+
+
+
+
+
+
+void Game::setupTiles(Map& map)
+{
+    const int floorExtent = 100;
+    const float tileSize = 5.0f;
+    const Color tileColor1 = Color{ 150, 200, 200, 255 };
+   
+    for (int y = -floorExtent; y < floorExtent; y++)
+    {
+        for (int x = -floorExtent; x < floorExtent; x++)
+        {
+            if ((y & 1) && (x & 1))
+            {
+                // Vector2 position{ x * tileSize,y * tileSize }; //Take this positions and store them as nodes 
+                 //DrawPlane(Vector3{ x * tileSize, 0.0f, y * tileSize }, Vector2{ tileSize, tileSize }, tileColor1);
+                if (map.tiles.size() < 100000)
+                {
+                    map.tiles.push_back(Tile{ Vector3{ x * tileSize, 0.0f, y * tileSize },Vector2{5.0f,5.0f},RED, idcount });
+                    idcount++;
+                }
+                
+
+                //DrawTexture(map.textures.at(0), position.x, position.y, GREEN);
+            }
+            else if (!(y & 1) && !(x & 1))
+            {
+                // Vector2 position{ x * tileSize,y * tileSize };
+                // DrawPlane(Vector3{ x * tileSize, 0.0f, y * tileSize }, Vector2{ tileSize, tileSize }, LIGHTGRAY);
+                if (map.tiles.size() < 100000)
+                {
+                    map.tiles.push_back(Tile{ Vector3{ x * tileSize, 0.0f, y * tileSize },Vector2{5.0f,5.0f},BLUE,idcount });
+                    idcount++;
+                }
+                
+                //DrawTexture(map.textures.at(0), position.x, position.y, GREEN);
+            }
+
+            else
+            {
+                if (map.tiles.size() < 100000)
+                {
+                    map.tiles.push_back(Tile{ Vector3{ x * tileSize, 0.0f, y * tileSize },Vector2{5.0f,5.0f},GREEN,idcount });
+                    idcount++;
+                }
+            }
+        }
+    }
+}
+void Game::drawMap(Map& map)
+{
+        const int floorExtent = 100;
+        const float tileSize = 5.0f;
+        const Color tileColor1 = Color{ 150, 200, 200, 255 };
+        int idcount{};
+
+        //walls
+
+        for (auto& w : map.walls)
+        {
+            DrawCubeV(w.position, w.size, w.color);
+            DrawBoundingBox(w.box, YELLOW);
+        }
+
+        // Floor tiles
+       
+      /*  for (const Tile& tile : map.tiles)
+        {
+            DrawPlane(tile.position,tile.size,tile.color);
+        }*/
+
+        /*for (auto& floor : map.tiles)
+        {
+            DrawTexture(map.textures.at(0),)
+        }*/
+
+        const Vector3 towerSize = Vector3{ 16.0f, 32.0f, 16.0f }; 
+        const Color towerColor = Color{ 150, 200, 200, 255 };
+
+
+
+
+        for (auto& t : map.buildings)
+        {
+            DrawCubeV(t.position, t.size, t.color);
+            //DrawCubeV(t.box.max, t.size, t.color);
+            DrawBoundingBox(t.box, BLACK);
+        }
+
+
+        /*for (auto& w : walls)
+        {
+            DrawLine3D(w.box.min, w.box.max, YELLOW);
+        }*/
+
+
+        // Red sun
+        DrawSphere(Vector3{ 300.0f, 300.0f, 0.0f }, 100.0f, Color{ 255, 0, 0, 255 });
+
+        
+    }
+
+void Game::drawEnemies(Actor& actor)
+{
+    DrawCubeV(actor.position, Vector3{5.0f,10.0f,5.0f}, RED);
+}
